@@ -1,5 +1,5 @@
 """
-WSGI config for joc project.
+WSGI config for junior project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
