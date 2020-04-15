@@ -216,31 +216,12 @@ def lessons(request, subject_id):
         return render(request, 'student/lessons.html', {'subject_id': subject_id, 'lesson_list':lesson_list})
 
 # 課程內容
-def lesson(request, lesson, unit, index):
-        lesson_dict = OrderedDict()
-        works = Work.objects.filter(user_id=request.user.id, lesson=lesson, index=index).order_by("-id")
-        for unit1 in lesson_list[int(lesson)-1][1]:
-            for assignment in unit1[1]:
-                sworks = list(filter(lambda w: w.index==assignment[2], works))
-                if len(sworks)>0 :
-                    lesson_dict[assignment[2]] = [assignment, sworks[0]]
-                else :
-                    lesson_dict[assignment[2]] = [assignment, None]
-        assignment = lesson_dict[int(index)]
-        scores = []
-        workfiles = []
-        #work_index = lesson_list[int(lesson)-1][1][int(unit)-1][1][int(index)-1][2]	
-        works = Work.objects.filter(typing=0, index=index, lesson=lesson, user_id=request.user.id)
-
-        if not works.exists():
-            form = SubmitAForm()
-        else:
-            workfiles = WorkFile.objects.filter(work_id=works[0].id).order_by("-id")							
-            form = SubmitAForm(instance=works[0])
-            if len(workfiles)>0 and works[0].scorer>0: 
-                score_name = User.objects.get(id=works[0].scorer).first_name
-                scores = [works[0].score, score_name]	
-        return render(request, 'student/lesson.html', {'assignment':assignment, 'index':index, 'form': form, 'unit':unit, 'lesson':lesson, 'scores':scores, 'workfiles': workfiles})
+def lesson(request, lesson, unit):
+    if unit < 10:
+        page = "student/lesson/C0" + str(unit) + ".html"
+    else :
+        page = "student/lesson/C" + str(unit) + ".html"
+    return render(request, 'student/lesson.html', {'unit':unit, 'lesson':lesson, 'page':page})
 
 def submit(request, typing, lesson, index):
     lesson_dict = OrderedDict()

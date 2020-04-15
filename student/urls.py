@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
     path('lessons/<int:subject_id>/', views.lessons),
-    path('lesson/<int:lesson>/<int:unit>/<int:index>/', views.lesson),  
+    path('lesson/<int:lesson>/<int:unit>/', views.lesson),  
     path('classroom/', views.ClassroomList.as_view()),
     path('classroom/join/<int:kind>', views.ClassroomJoinList.as_view()),    
     path('classroom/<int:pk>/enroll/', views.ClassroomEnrollCreate.as_view()), 
