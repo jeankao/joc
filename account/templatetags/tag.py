@@ -97,20 +97,12 @@ def assistant(user_id):
 	
 @register.filter
 def pre_survey_done(user_id):
-    surveys = PreSurvey.objects.filter(student_id=user_id)
-    if len(surveys)>0:
-        return True
-    else:
-        return False
+    return True
 			
 @register.filter
 def post_survey_done(user_id):
-    surveys = PostSurvey.objects.filter(student_id=user_id)
-    if len(surveys)>0:
-        return True
-    else:
-        return False		
-		
+	return True
+
 @register.filter
 def lesson_name(lesson, index):
         lesson_dict = {}

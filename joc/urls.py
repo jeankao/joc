@@ -14,4 +14,5 @@ urlpatterns = [
     path('teacher/', include('teacher.urls')), 
     path('student/', include('student.urls')),   	
     path('captcha/', include('captcha.urls')),
+    path('annotate/', include('annotate.urls')),
 ]

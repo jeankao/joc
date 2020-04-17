@@ -1,6 +1,7 @@
 Annotator.Plugin.Image = function(element, types) {
     if ($('img', element).length === 0)
         return;
+    var img = $('img', element);
     return {
         traceMouse: false,
         pluginInit: function() {
@@ -9,14 +10,16 @@ Annotator.Plugin.Image = function(element, types) {
             let annotator = this.annotator;
             var startPoint = null;
             var activeRect = null;
-            var imgWidth = $('img', element).width();
-            var imgHeight = $('img', element).height();
+            var imgWidth = img.width;
+            var imgHeight = img.height();
             var type_count = 0;
             var highlights = [];
             var isTouchSupported = 'ontouchstart' in window;
             var prevTouch = null;
             for (let xi in types)
                 type_count++;
+
+            console.log($('img', element), imgWidth, imgHeight);
 
             function modifyHighlightColor(annotation) {
                 let highlight = highlights['d' + annotation.id];
@@ -194,6 +197,8 @@ Annotator.Plugin.Image = function(element, types) {
                         width: $(activeRect).width(),
                         height: $(activeRect).height(),
                     };
+                    let imgHeight = $(img).height(), 
+                        imgWidth = $(img).width();
                     annotation.shapes = [{
                         geometry: {
                             y: rect.top / imgHeight,
@@ -239,4 +244,49 @@ Annotator.Plugin.Image = function(element, types) {
             });
         },
     }
+};
+
+//---------------------------------------------------------------------------
+
+function userAnnotationInit(userid, lesson, page) {
+    $('img.annotate').each(function(index, element) {
+        $(element).wrap("<div></div>").parent().annotator()
+            .annotator('addPlugin', 'Store', {
+                prefix: '/annotate', 
+                annotationData: {
+                    'lesson': lesson, 
+                    'page': page, 
+                    'img': (new URL(element.src)).pathname,
+                    'userid': userid,
+                }, 
+                loadFromSearch: {
+                    'userid': userid, 
+                    'img': (new URL(element.src)).pathname,
+                }
+            })
+            .annotator('addPlugin', 'Touch')
+            .annotator('addPlugin', 'Image');
+    });
+/*
+    $('div.annotate').each(function(index, element) {
+        var img = $('img', element);
+        $(element).annotator()
+        .annotator('addPlugin', 'Store', {
+            prefix: '/annotate', 
+            annotationData: {
+                'lesson': lesson, 
+                'page': page, 
+                'img': (new URL(img.src)).pathname,
+                'userid': userid,
+            }, 
+            loadFromSearch: {
+                'userid': userid, 
+                'img': (new URL(img.src)).pathname,
+            }
+        })
+        .annotator('addPlugin', 'Touch')
+        .annotator('addPlugin', 'Image')
+
+    });
+    */
 }

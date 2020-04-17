@@ -6,3 +6,5 @@ db.sqlite3
 static/attach
 static/upload
 static/work
+
+.vscode/

@@ -199,28 +199,29 @@ class ClassroomComputerUpdate(LoginRequiredMixin,UpdateView):
 
 # 分類課程    
 def lessons(request, subject_id): 
-        del lesson_list[:]
-        reset()   
-        works = Work.objects.filter(typing=0, user_id=request.user.id, lesson=subject_id).order_by("-id")	
-        if subject_id == 1 :
-            for unit, unit1 in enumerate(lesson_list[int(subject_id)-2][1]):
-                for index, assignment in enumerate(unit1[1]):
-                    if len(works) > 0 :
-                        sworks = list(filter(lambda w: w.index==assignment[2], works))
-                        if len(sworks)>0 :
-                            lesson_list[int(subject_id)-1][1][unit][1][index].append(sworks[0])
-                        else :
-                            lesson_list[int(subject_id)-1][1][unit][1][index].append(False)
+    # del lesson_list[:]
+    # reset()
+    works = Work.objects.filter(typing=0, user_id=request.user.id, lesson=subject_id).order_by("-id")	
+    if subject_id == 1 :
+        for unit, unit1 in enumerate(lesson_list[int(subject_id)-2][1]):
+            for index, assignment in enumerate(unit1[1]):
+                if len(works) > 0 :
+                    sworks = list(filter(lambda w: w.index==assignment[2], works))
+                    if len(sworks)>0 :
+                        lesson_list[int(subject_id)-1][1][unit][1][index].append(sworks[0])
                     else :
-                        lesson_list[int(subject_id)-2][1][unit][1][index].append(False)         
-        return render(request, 'student/lessons.html', {'subject_id': subject_id, 'lesson_list':lesson_list})
+                        lesson_list[int(subject_id)-1][1][unit][1][index].append(False)
+                else :
+                    lesson_list[int(subject_id)-2][1][unit][1][index].append(False)         
+    return render(request, 'student/lessons.html', {'subject_id': subject_id, 'lesson_list':lesson_list})
 
 # 課程內容
 def lesson(request, lesson, unit):
-    if unit < 10:
-        page = "student/lesson/C0" + str(unit) + ".html"
-    else :
-        page = "student/lesson/C" + str(unit) + ".html"
+    # if unit < 10:
+    #     page = "student/lesson/C0" + str(unit) + ".html"
+    # else :
+    #     page = "student/lesson/C" + str(unit) + ".html"
+    page = "student/lesson/C{:02d}.html".format(unit)
     return render(request, 'student/lesson.html', {'unit':unit, 'lesson':lesson, 'page':page})
 
 def submit(request, typing, lesson, index):

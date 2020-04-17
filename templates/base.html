@@ -121,12 +121,9 @@
  
   $(document).ready(function(){
     $('main').css('padding-top', $('.toprow').height());
-    {% block domready %}
-    {% endblock %}
+    {% block domready %}{% endblock %}
   });
-  {% block userscript %}
-  
-  {% endblock %}
+  {% block userscript %}{% endblock %}
   $("#backtotop").click(function () {
     $("body,html").animate({
         scrollTop: 0
@@ -140,7 +137,6 @@
     }
 });  
 </script>        
-{% block footer_script %}
-{% endblock %}
+{% block footer_script %}{% endblock %}
 </body>
 </html>
