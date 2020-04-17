@@ -1,4 +1,4 @@
-Annotator.Plugin.Image = function(element, types) {
+Annotator.Plugin.Image = function(element) {
     if ($('img', element).length === 0)
         return;
     var img = $('img', element);
@@ -10,32 +10,16 @@ Annotator.Plugin.Image = function(element, types) {
             let annotator = this.annotator;
             var startPoint = null;
             var activeRect = null;
-            var imgWidth = img.width;
-            var imgHeight = img.height();
-            var type_count = 0;
             var highlights = [];
             var isTouchSupported = 'ontouchstart' in window;
             var prevTouch = null;
-            for (let xi in types)
-                type_count++;
-
-            console.log($('img', element), imgWidth, imgHeight);
-
-            function modifyHighlightColor(annotation) {
-                let highlight = highlights['d' + annotation.id];
-                if (highlight && type_count > 0) {
-                    $(highlight.div).css('border-color', types['t' + annotation.atype].color);
-                }
-            }
 
             function createHighlight(left, top, width, height, annotation) {
                 var div = document.createElement('div');
-                $(div).addClass('annotator-hl annotator-img-rect').css({
-                    left: left + 'px',
-                    top: top + 'px',
-                    width: width + 'px',
-                    height: height + 'px',
-                });
+                $(div).addClass('annotator-hl annotator-img-rect')
+                    .offset({left: left, top: top})
+                    .width(width)
+                    .height(height);
                 $('.annotator-wrapper', element).append(div);
                 if (annotation) {
                     $(div).data('annotation', annotation)
@@ -50,9 +34,10 @@ Annotator.Plugin.Image = function(element, types) {
                         'div': div,
                         'annotation': annotation
                     };
-                    modifyHighlightColor(annotation);
                     $(div).off('mouseover');
                     $(div).on('mouseover', function(event) {
+                        return ;
+                        // 暫時不用 ... //
                         var pos = $(event.target).position();
                         var x = pos.left + event.offsetX;
                         var y = pos.top + event.offsetY;
@@ -183,6 +168,7 @@ Annotator.Plugin.Image = function(element, types) {
             this.annotator.subscribe("annotationsLoaded", function(annotations) {
                 for (let i in annotations) {
                     let item = annotations[i];
+                    let imgWidth = img.width(), imgHeight = img.height();
                     var rect = item.shapes[0].geometry;
                     createHighlight(rect.x * imgWidth, rect.y * imgHeight, rect.width * imgWidth, rect.height * imgHeight, item);
                 }
@@ -192,13 +178,13 @@ Annotator.Plugin.Image = function(element, types) {
                 var aid = annotation.id || 0;
                 if (!aid) {
                     var rect = {
-                        left: parseInt($(activeRect).css('left').slice(0, -2)),
-                        top: parseInt($(activeRect).css('top').slice(0, -2)),
-                        width: $(activeRect).width(),
-                        height: $(activeRect).height(),
+                        left: activeRect.offsetLeft, 
+                        top: activeRect.offsetTop, 
+                        width: activeRect.offsetWidth, 
+                        height: activeRect.offsetHeight, 
                     };
-                    let imgHeight = $(img).height(), 
-                        imgWidth = $(img).width();
+                    let imgHeight = img.height(), 
+                        imgWidth = img.width();
                     annotation.shapes = [{
                         geometry: {
                             y: rect.top / imgHeight,
@@ -219,15 +205,15 @@ Annotator.Plugin.Image = function(element, types) {
                     if (!annotation.id) {
                         window.setTimeout(verify_id, 5);
                     } else {
+                        let imgWidth = img.width(), imgHeight = img.height();
                         createHighlight(rect.x * imgWidth, rect.y * imgHeight, rect.width * imgWidth, rect.height * imgHeight, annotation);
                     }
                 })();
             });
-
+/*
             this.annotator.subscribe("annotationUpdated", function(annotation) {
-                modifyHighlightColor(annotation);
             });
-
+*/
             this.annotator.subscribe("annotationEditorHidden", function(editor) {
                 if (activeRect) {
                     $(activeRect).remove();
@@ -267,26 +253,4 @@ function userAnnotationInit(userid, lesson, page) {
             .annotator('addPlugin', 'Touch')
             .annotator('addPlugin', 'Image');
     });
-/*
-    $('div.annotate').each(function(index, element) {
-        var img = $('img', element);
-        $(element).annotator()
-        .annotator('addPlugin', 'Store', {
-            prefix: '/annotate', 
-            annotationData: {
-                'lesson': lesson, 
-                'page': page, 
-                'img': (new URL(img.src)).pathname,
-                'userid': userid,
-            }, 
-            loadFromSearch: {
-                'userid': userid, 
-                'img': (new URL(img.src)).pathname,
-            }
-        })
-        .annotator('addPlugin', 'Touch')
-        .annotator('addPlugin', 'Image')
-
-    });
-    */
 }

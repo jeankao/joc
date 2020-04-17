@@ -50,11 +50,12 @@ def get_annotation(req, aid):
             response = HttpResponse(status=204)
         elif req.method == "PUT":   # 修改標註資料
             received_annotation = json.loads(req.body)
+            del received_annotation['id']
             del received_annotation['lesson']
             del received_annotation['page']
             annotation.content = received_annotation
             annotation.save()
-            response = HttpResponseSeeOtherRedirect(reverse('annotation_get', args[annotation.id]))
+            response = HttpResponseSeeOtherRedirect(reverse('annotation_get', args=[annotation.id]))
         else:   # GET
             result = annotation.content
             result['id'] = annotation.id
