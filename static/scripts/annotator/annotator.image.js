@@ -1,7 +1,6 @@
 Annotator.Plugin.Image = function(element) {
     if ($('img', element).length === 0)
         return;
-    var img = $('img', element);
     return {
         traceMouse: false,
         pluginInit: function() {
@@ -9,54 +8,30 @@ Annotator.Plugin.Image = function(element) {
                 return;
             let annotator = this.annotator;
             var startPoint = null;
+            var currentImg = null;
             var activeRect = null;
-            var highlights = [];
             var isTouchSupported = 'ontouchstart' in window;
             var prevTouch = null;
 
-            function createHighlight(left, top, width, height, annotation) {
+            // Create Image Wrapper Div
+            $('img', element).each(function(index, img) {
+                var img_wrapper = document.createElement('div');
+                $(img_wrapper).addClass('annotator-img-wrapper');
+                $(img).before(img_wrapper);
+                $(img_wrapper).append(img);
+            });
+
+            function createHighlight(left, top, width, height, img, annotation) {
                 var div = document.createElement('div');
                 $(div).addClass('annotator-hl annotator-img-rect')
                     .offset({left: left, top: top})
                     .width(width)
                     .height(height);
-                $('.annotator-wrapper', element).append(div);
+                $(img).parent().append(div);
                 if (annotation) {
                     $(div).data('annotation', annotation)
                         .data('annotation-id', annotation.id);
-                    div.rect = {
-                        left: left,
-                        top: top,
-                        right: left + width,
-                        bottom: top + height
-                    };
-                    highlights['d' + annotation.id] = {
-                        'div': div,
-                        'annotation': annotation
-                    };
                     $(div).off('mouseover');
-                    $(div).on('mouseover', function(event) {
-                        return ;
-                        // 暫時不用 ... //
-                        var pos = $(event.target).position();
-                        var x = pos.left + event.offsetX;
-                        var y = pos.top + event.offsetY;
-                        var annotations = [];
-                        for (let i in highlights) {
-                            let highlight = highlights[i];
-                            let rect = highlight.div.rect;
-                            if (x > rect.left && x < rect.right && y > rect.top && y < rect.bottom)
-                                annotations.push(highlight.annotation);
-                        }
-                        if (annotations.length > 1) {
-                            window.setTimeout(function() {
-                                annotator.showViewer(annotations, {
-                                    left: x,
-                                    top: y
-                                });
-                            }, 100);
-                        }
-                    });
                 } else {
                     $(div).off('mouseover');
                     $(div).on('mouseover', function(event) {
@@ -72,25 +47,27 @@ Annotator.Plugin.Image = function(element) {
                 return div;
             }
 
-            function markStart(point) {
+            function markStart(point, img) {
                 annotator.editor.hide();
                 self.traceMouse = true;
                 startPoint = {
                     x: point.x,
                     y: point.y
                 };
-                activeRect = createHighlight(point.x, point.y, 0, 0, null);
+                activeRect = createHighlight(point.x, point.y, 0, 0, img, null);
             }
 
             function markEnd(point) {
                 self.traceMouse = false;
                 startPoint = null;
                 annotator.viewer.hide();
+                var offset = $(currentImg).offset();
+                var woffset = $('.annotator-wrapper', element).offset();
                 annotator.showEditor({
                     text: ''
                 }, {
-                    left: point.x,
-                    top: point.y
+                    left: point.x + offset.left - woffset.left,
+                    top: point.y + offset.top - woffset.top,
                 });
             }
 
@@ -105,10 +82,11 @@ Annotator.Plugin.Image = function(element) {
 
             $('img', element).on('mousedown', function(e) {
                 if (!annotator.options.readOnly && e.which === 1) {
+                    currentImg = e.target;
                     markStart({
                         x: e.offsetX,
                         y: e.offsetY
-                    });
+                    }, e.target);
                 }
                 return false;
             });
@@ -144,7 +122,7 @@ Annotator.Plugin.Image = function(element) {
                         markStart({
                             x: e.touches[0].pageX - e.target.x,
                             y: e.touches[0].pageY - e.target.y
-                        });
+                        }, e.target);
                     }
                 });
                 $('img', element).on('touchend', function(e) {
@@ -168,52 +146,59 @@ Annotator.Plugin.Image = function(element) {
             this.annotator.subscribe("annotationsLoaded", function(annotations) {
                 for (let i in annotations) {
                     let item = annotations[i];
-                    let imgWidth = img.width(), imgHeight = img.height();
+                    if (!item.shapes)   // ignore non-image annotations
+                        continue;
+                    var img = $("img[src='"+item.img+"']", element)[0];
                     var rect = item.shapes[0].geometry;
-                    createHighlight(rect.x * imgWidth, rect.y * imgHeight, rect.width * imgWidth, rect.height * imgHeight, item);
+                    var imgWidth = $(img).width();
+                    var imgHeight = $(img).height();
+                        
+                    createHighlight(rect.x * imgWidth, rect.y * imgHeight, rect.width * imgWidth, rect.height * imgHeight, img, item);
                 }
             });
 
             this.annotator.subscribe('annotationEditorSubmit', function(editor, annotation) {
                 var aid = annotation.id || 0;
+                if (!activeRect)
+                    return;
                 if (!aid) {
-                    var rect = {
-                        left: activeRect.offsetLeft, 
-                        top: activeRect.offsetTop, 
-                        width: activeRect.offsetWidth, 
-                        height: activeRect.offsetHeight, 
-                    };
-                    let imgHeight = img.height(), 
-                        imgWidth = img.width();
+                    var imgHeight = $(currentImg).height(), 
+                        imgWidth = $(currentImg).width();
+                    
+                    annotation.img = (new URL(currentImg.src)).pathname;
                     annotation.shapes = [{
                         geometry: {
-                            y: rect.top / imgHeight,
-                            x: rect.left / imgWidth,
-                            width: rect.width / imgWidth,
-                            height: rect.height / imgHeight,
+                            y: activeRect.offsetTop / imgHeight,
+                            x: activeRect.offsetLeft / imgWidth,
+                            width: activeRect.offsetWidth / imgWidth,
+                            height: activeRect.offsetHeight / imgHeight,
                         },
-                        style: {},
                     }];
                     annotator.publish('annotationCreated', annotation);
-                } else
+                } else {
                     annotator.publish('annotationUpdated', annotation);
+                }
             });
 
             this.annotator.subscribe('annotationCreated', function(annotation) {
+                if (!annotation.shapes)
+                    return;
                 var rect = annotation.shapes[0].geometry;
                 (function verify_id() {
                     if (!annotation.id) {
                         window.setTimeout(verify_id, 5);
                     } else {
-                        let imgWidth = img.width(), imgHeight = img.height();
-                        createHighlight(rect.x * imgWidth, rect.y * imgHeight, rect.width * imgWidth, rect.height * imgHeight, annotation);
+                        var imgHeight = $(currentImg).height(), 
+                            imgWidth = $(currentImg).width();
+                        createHighlight(rect.x * imgWidth, rect.y * imgHeight, rect.width * imgWidth, rect.height * imgHeight, currentImg, annotation);
                     }
                 })();
             });
-/*
-            this.annotator.subscribe("annotationUpdated", function(annotation) {
-            });
-*/
+
+            // this.annotator.subscribe("annotationUpdated", function(annotation) {
+            //     modifyHighlightColor(annotation);
+            // });
+
             this.annotator.subscribe("annotationEditorHidden", function(editor) {
                 if (activeRect) {
                     $(activeRect).remove();
@@ -222,33 +207,33 @@ Annotator.Plugin.Image = function(element) {
             });
 
             this.annotator.subscribe("annotationDeleted", function(annotation) {
-                let highlight = highlights['d' + annotation.id];
-                if (highlight) {
-                    $(highlight.div).remove();
-                    delete highlights['d' + annotation.id];
+                if (annotation.img) {
+                    $(".annotator-img-rect").each(function(index, div) {
+                        if (annotation.id == $(div).data('annotation-id'))
+                            $(div).remove();
+                    });
                 }
             });
         },
     }
-};
+}
 
 //---------------------------------------------------------------------------
-
-function userAnnotationInit(userid, lesson, page) {
-    $('img.annotate').each(function(index, element) {
-        $(element).wrap("<div></div>").parent().annotator()
+function userAnnotationInit(userid, lesson, unit) {
+    $('div.annotate').each(function(index, element) {
+        $(element).annotator()
             .annotator('addPlugin', 'Store', {
                 prefix: '/annotate', 
                 annotationData: {
-                    'lesson': lesson, 
-                    'page': page, 
-                    'img': (new URL(element.src)).pathname,
                     'userid': userid,
-                }, 
+                    'lesson': lesson, 
+                    'unit': unit,
+                },
                 loadFromSearch: {
-                    'userid': userid, 
-                    'img': (new URL(element.src)).pathname,
-                }
+                    'userid': userid,
+                    'lesson': lesson, 
+                    'unit': unit,
+                },
             })
             .annotator('addPlugin', 'Touch')
             .annotator('addPlugin', 'Image');

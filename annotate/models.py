@@ -10,6 +10,5 @@ class Annotation(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     lesson = models.IntegerField(default=0)
-    page = models.TextField(default='')
-    image = models.TextField(default='')
+    unit = models.IntegerField(default=0)
     content = JSONField()

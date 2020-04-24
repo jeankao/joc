@@ -16,13 +16,15 @@
 
 {% block content %}
   {% if lesson == 1 %}
-    {% include page %}    
+    <div class="annotate">
+    {% include page %}
+    </div>
   {% endif %}
 {% endblock %}
 
 {% block domready %}
   {%if user.is_authenticated %}
   // Annotation //
-  userAnnotationInit({{ user.id }}, {{ lesson }}, '{{ page }}');
+  userAnnotationInit({{ user.id }}, {{ lesson }}, {{ unit }});
   {% endif %}
 {% endblock %}

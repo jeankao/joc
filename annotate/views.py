@@ -21,14 +21,13 @@ def annotations(req):
     if req.method == "POST":
         received_annotation = json.loads(req.body)
         lesson = received_annotation['lesson']
-        page = received_annotation['page']
+        unit = received_annotation['unit']
         del received_annotation['lesson']
-        del received_annotation['page']
+        del received_annotation['unit']
         annotation = Annotation(
             user = req.user, 
             lesson = lesson, 
-            page = page, 
-            image = received_annotation['img'],
+            unit = unit,
             content = received_annotation,
         )
         annotation.save()
@@ -52,7 +51,7 @@ def get_annotation(req, aid):
             received_annotation = json.loads(req.body)
             del received_annotation['id']
             del received_annotation['lesson']
-            del received_annotation['page']
+            del received_annotation['unit']
             annotation.content = received_annotation
             annotation.save()
             response = HttpResponseSeeOtherRedirect(reverse('annotation_get', args=[annotation.id]))
@@ -68,8 +67,9 @@ def get_annotation(req, aid):
 
 def search(req):
     userid = req.GET.get('userid', default=0)
-    image = req.GET.get('img', default='')
-    qs = Annotation.objects.filter(image=image)
+    lesson = req.GET.get('lesson', default=0)
+    unit = req.GET.get('unit', default=0)
+    qs = Annotation.objects.filter(lesson=lesson, unit=unit)
     if userid == 0:
         pass
     else:
