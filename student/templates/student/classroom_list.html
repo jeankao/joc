@@ -59,12 +59,10 @@
     {% get_pagination %}
 {% endblock %}
   {% block footer_script %}
-  <script>
-    function scroll(element) {
+   function scroll(element) {
   // scrolls to the element with id='citation' 
 var node = document.getElementById(element);    
 node.scrollIntoView();
       window.scrollBy(0, -120);
     }
-  </script>
   {% endblock %}
