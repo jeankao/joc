@@ -27,4 +27,22 @@
   // Annotation //
   userAnnotationInit({{ user.id }}, {{ lesson }}, {{ unit }});
   {% endif %}
+  {% endblock %}
+
+{% block footer_script %}
+$('a.expand').click(function(e){
+  var launcher = this;  
+  $(launcher).hide();
+  $("#div"+$(launcher).data('contentid')).show();
+  $("#memo"+$(launcher).data('contentid')).show();          
+  $("#close"+$(launcher).data('contentid')).show();          
+});  
+
+$('a.unexpand').click(function(e){
+  var launcher = this;  
+  $(launcher).hide();
+  $("#div"+$(launcher).data('contentid')).hide();
+  $("#memo"+$(launcher).data('contentid')).hide();          
+  $("#expand"+$(launcher).data('contentid')).show();          
+});   
 {% endblock %}

@@ -106,10 +106,9 @@ def post_survey_done(user_id):
 @register.filter
 def lesson_name(lesson, index):
         lesson_dict = {}
-        for unit1 in lesson_list[int(lesson)-1][1]:
-            for assignment in unit1[1]:
-                lesson_dict[assignment[2]] = assignment[0]
-        return lesson_dict[int(index)]
+        for i, unit1 in enumerate(lesson_list[int(lesson)-1][1]):
+            lesson_dict[i] = unit1[0]
+        return lesson_dict[index]
 
 @register.filter
 def group_name(group_id):
@@ -384,3 +383,80 @@ def in_deadline_speculation(forum_id, classroom_id):
         if timezone.now() > fclass.deadline_date:
             return fclass.deadline_date
     return ""
+
+@register.filter
+def hash_helps(h, key):
+    key = int(key)
+    if key in h:
+      return h[key][0].helps
+    else:
+      return -1
+
+@register.filter
+def hash_score(h, key):
+    key = int(key)
+    if key in h:
+      return h[key][0].score
+    else:
+      return -1  
+    
+@register.filter
+def hash_date(h, key):
+    key = int(key)
+    if key in h:
+      return h[key][0].publication_date
+    else:
+      return False
+    
+@register.filter
+def hash_scorer(h, key):
+    key = int(key)
+    if key in h:
+      return h[key][0].scorer
+    else:
+      return 0
+    
+@register.filter
+def hash_workid(h, key):
+    key = int(key)
+    if key in h:
+      return h[key][0].id
+    else:
+      return 0    
+    
+@register.filter
+def hash_file(h, key):
+    key = int(key)
+    if key in h:
+      if len(h[key][1])>0:
+        return h[key][1][0].filename
+      else:
+        return "hi"
+    else:
+      return "no"
+    
+@register.filter
+def hash_files(h, key):
+    key = int(key)
+    if key in h:
+      if len(h[key][1])>0:
+        return h[key][1]
+      else:
+        return None
+    else:
+      return None
+
+@register.filter
+def hash_picture(h, key):
+    key = int(key)
+    if key in h:
+        return h[key][0].picture
+    return None
+    
+@register.filter
+def hash_code(h, key):
+    key = int(key)
+    if key in h:
+      return h[key][0].code
+    else:
+      return ""

@@ -17,16 +17,9 @@ class Enroll(models.Model):
     computer = models.IntegerField("電腦", default=0)   
     # 組別
     group = models.IntegerField(default=-1)
-    # 創意秀組別
-    #groupshow = models.CommaSeparatedIntegerField(max_length=200)
-    groupshow = models.CharField(validators=[validate_comma_separated_integer_list], max_length=200) 
     # 心得
-    score_memo0 = models.IntegerField(default=0)    
-    score_memo1 = models.IntegerField(default=0)
-    score_memo2 = models.IntegerField(default=0)    
-    score_memo0_custom = models.IntegerField(default=0)	
-    score_memo1_custom = models.IntegerField(default=0)	
-    score_memo2_custom = models.IntegerField(default=0)	        
+    score_memo = models.IntegerField(default=0)    
+        
     
     @property
     def classroom(self):

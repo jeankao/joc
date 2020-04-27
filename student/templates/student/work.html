@@ -16,8 +16,8 @@
     {% for key, assignment in lesson_dict %}
         <tr align=left>
         <td align=right>{{forloop.counter}}</td>          
-            <td>{{assignment.0}}{% if typing == 0 %}-{{assignment.1}}{% endif %}</td>
-			<td>{% if assignment.2.score > 0 %}<a href="/student/work/show/{{typing}}/{{classroom.lesson}}/{{key}}/{{request.user.id}}">已評分</a>{% else %}<a href="{% if typing == 0 %}/student/lesson/{{classroom.lesson}}/{{assignment.3}}/{{key}}/#tab4{% else %}/student/work/submit/1/{{classroom.lesson}}/{{key}}{% endif %}">繳交</a>{% endif %}</td>
+            <td>{{assignment.0}}</td>
+			<td>{% if assignment.2.score > 0 %}<a href="/student/work/show/{{typing}}/{{classroom.lesson}}/{{key}}/{{request.user.id}}">已評分</a>{% else %}<a href="/student/work/submit/{{typing}}/{{classroom.lesson}}/{{key}}">繳交</a>{% endif %}</td>
             <td>{% if assignment.2 %}{% if assignment.2.scorer == 0  %}尚未評分{% else %}{{assignment.2.scorer|nickname}}{% endif %}{% endif %}</td>
             {% if assignment.2.score < 0 %}
                 <td>已繳交</td>

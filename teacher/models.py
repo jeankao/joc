@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 # 班級
 class Classroom(models.Model):
     Lesson_CHOICES = [		                
-        (1, '※基礎程式設計：使用Scratch3.X'),                
+        (1, '數學解題程式設計(1)：使用Python3'),                
 		]	
 		
     Progress_CHOICES = [				
@@ -21,7 +21,7 @@ class Classroom(models.Model):
 		]	
 
     LessonShort_CHOICES = [	           
-        (1, 'Scratch-7'),                                     
+        (1, 'Euler1'),                                     
 		]		
 		
     # 班級名稱
@@ -34,8 +34,6 @@ class Classroom(models.Model):
     teacher_id = models.IntegerField(default=0)
     # 使用分組
     group = models.IntegerField(default=0)
-    # 是否開放創意秀分組
-    group_show_open = models.BooleanField(default=False)
     # 組別人數
     group_show_size = models.IntegerField(default=2)  
     # 學生進度

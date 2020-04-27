@@ -144,11 +144,8 @@ class ClassroomCreate(TeacherRequiredMixin, CreateView):
         queryset = []		
         works = Work.objects.filter(user_id=self.request.user.id, lesson=lesson).order_by("id")		
         if lesson == 1 :
-            for unit in lesson_list[int(lesson)-2][1]:
-                for assignment in unit[1]:
-                    queryset.append(assignment)     
-            for assignment in queryset:
-                workgroup = WorkGroup(classroom_id=classroom.id, index=assignment[2])
+            for i,unit in enumerate(lesson_list[lesson-1][1]):
+                workgroup = WorkGroup(classroom_id=classroom.id, index=i)
                 workgroup.save()
         return valid
     

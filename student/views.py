@@ -222,7 +222,8 @@ def lesson(request, lesson, unit):
     # else :
     #     page = "student/lesson/C" + str(unit) + ".html"
     page = "student/lesson/C{:02d}.html".format(unit)
-    return render(request, 'student/lesson.html', {'unit':unit, 'lesson':lesson, 'page':page})
+    exercises = lesson_list[lesson-1][1][unit-1][1]
+    return render(request, 'student/lesson.html', {'exercises': exercises, 'unit':unit, 'lesson':lesson, 'page':page})
 
 def submit(request, typing, lesson, index):
     lesson_dict = OrderedDict()
@@ -230,9 +231,8 @@ def submit(request, typing, lesson, index):
     work_dict = dict(((int(work.index), [work, WorkFile.objects.filter(work_id=work.id).order_by("-id")]) for work in Work.objects.filter(typing=typing, lesson=lesson, user_id=request.user.id)))
     works = Work.objects.filter(typing=typing, user_id=request.user.id, lesson=lesson, index=index).order_by("-id")
     if typing == 0: 
-        for unit in lesson_list[int(lesson)-1][1]:
-            for assignment in unit[1]:
-                lesson_dict[assignment[2]] = assignment[0]
+        for i, unit in enumerate(lesson_list[int(lesson)-1][1]):
+            lesson_dict[i] = unit[0]
         assignment = lesson_dict[index]
     elif typing == 1:
         assignment = TWork.objects.get(id=index).title
@@ -295,10 +295,9 @@ def work(request, typing, classroom_id):
         if lesson == 1:
             assignments = lesson_list      
             unit_count = 1
-            for unit in lesson_list[int(lesson)-2][1]:
-                for assignment in unit[1]:
+            for i, unit in enumerate(lesson_list[lesson-1][1]):
                     try:
-                        group_id = WorkGroup.objects.get(classroom_id=classroom_id, index=assignment[2], typing=typing).group_id
+                        group_id = WorkGroup.objects.get(classroom_id=classroom_id, index=i, typing=typing).group_id
                     except ObjectDoesNotExist:
                         group_id = 0
                     enroll_id = Enroll.objects.get(classroom_id=classroom_id, student_id=request.user.id).id
@@ -307,17 +306,17 @@ def work(request, typing, classroom_id):
                         group = studentgroup.group
                     except ObjectDoesNotExist:
                         group = -1    
-                    sworks = list(filter(lambda w: w.index==assignment[2], works))
-                    assistant = list(filter(lambda w: (w.index==assignment[2] and w.group==group), assistant_pool))
+                    sworks = list(filter(lambda w: w.index==i, works))
+                    assistant = list(filter(lambda w: (w.index==i and w.group==group), assistant_pool))
                     if len(sworks)>0 :
                         if len(assistant) > 0:
-                            lesson_dict[assignment[2]] = [unit[0], assignment[0], sworks[0], unit_count, assistant[0].student_id]
+                            lesson_dict[i] = [unit[0], False, sworks[0], unit_count, assistant[0].student_id]
                         else :
-                            lesson_dict[assignment[2]] = [unit[0], assignment[0], sworks[0], unit_count, 0]                        
+                            lesson_dict[i] = [unit[0], False, sworks[0], unit_count, 0]                        
                     else :
-                         lesson_dict[assignment[2]] = [unit[0], assignment[0], None, unit_count]
+                         lesson_dict[i] = [unit[0], False, None, unit_count]
 			
-                unit_count += 1
+                    unit_count += 1
         return render(request, 'student/work.html', {'typing': typing, 'works':works, 'lesson_dict':lesson_dict.items(), 'user_id': request.user.id, 'classroom':classroom})					
 			
     elif typing == 1:
@@ -598,9 +597,8 @@ def progress(request, typing, classroom_id, group_id):
     enroll_group = map(lambda a: a.enroll_id, enroll_groups)
     if typing == 0:		
         if lesson == 1:
-            for unit in lesson_list[int(classroom.lesson)-2][1]:
-                for assignment in unit[1]:
-                    lesson_dict[assignment[2]] = assignment[0]
+            for i, unit in enumerate(lesson_list[classroom.lesson-1][1]):
+                lesson_dict[i] = unit[0]
         for enroll in enrolls:
             bars1 = []
             for key, assignment in lesson_dict.items():

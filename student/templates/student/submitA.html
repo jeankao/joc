@@ -1,60 +1,129 @@
+{% extends "base.html" %}
 {% load tag %}
-{% block content %}
-<script type="text/javascript">
-function checkvalue(a, index) { 
-    var mystring = document.getElementById('id_memo'+index).value; 
-    if(!mystring.match(/\S/)) {
-        alert ('請填寫心得~~');
-        return false;
-    } else {
-        return true;
-    }
-}
-$(function () {
-    $('input[type=file][name="file"]').change(function () {
-        var val = $(this).val().toLowerCase(),
-            regex = new RegExp("(.*?)\.(sb3)$");
-        if (!(regex.test(val))) {
-            $(this).val('');
-            alert('您的檔案格式錯誤，只能上傳Scratch作品(.sb3)');
-        }
+{% block header %}
+<script language="javascript">
+    window.addEventListener('load', function (e) {
+        var node = document.getElementById('edit-box{{index}}');
+        node.onpaste = function (e) {
+            if (e.clipboardData && e.clipboardData.types) {
+                // Loop the data store in type and display it
+                for (var i = 0; i < e.clipboardData.types.length; ++i) {
+                    var key = e.clipboardData.types[i];
+                    var item = e.clipboardData.items[i];
+                    if (key === 'Files') {
+                        var file = item.getAsFile();
+                        var reader = new FileReader();
+                        reader.onload = function(evt) {
+                            var img = document.createElement('img');
+                            img.src = evt.target.result;
+                            //$(node).append(img);
+                            $(node).empty().append(img);
+                        };
+                        reader.readAsDataURL(file);
+                        return found = true;
+                    }
+                }
+            }
+        };
+        //$("#edit-box").focus();
+        $("#form{{index}}").submit(function(event) {
+            var img = $("img", $("#edit-box{{index}}"));
+            if (img.length < 1) {
+                alert("請先貼上螢幕擷圖後再按上傳");
+                event.preventDefault();
+            } else {
+                $("#screenshot{{index}}").val(img[0].src);
+            }
+        });
+		$("#id_memo{{index}}").focus();
     });
-});  
+	
+	function validateForm() {
+    /*
+	    if ($('input[name=help]:checked').length == 0) {
+            // do something here
+			      alert("請填寫創作過程!")
+            var row = document.getElementById('trp1')
+            row.style.backgroundColor = "#ffb0aa";       
+            top = row.offsetTop
+            window.scrollTo( 0, top );			
+			return false;
+        }
+       */
+	}
 </script>
-            <form action="/student/work/submit/{% if typing == "0" %}0{% else %}1{% endif %}/{% if 'A' in lesson %}1{% else %}{{lesson}}{% endif %}/{{index}}/" method="post" enctype="multipart/form-data" onsubmit="return checkvalue(this, {{index}});">      
-              <input type="hidden" name="lesson" value={{lesson}}>             
-              <table class="table">            
-        {% if not work_dict|hash_memo:index %}                      
-            <tr><td>狀態</td><td>尚未繳交</td></tr>
-        {% else %}
-            {% if work_dict|hash_score:index > 0 %}
-              <tr><Td>分數</td><td>{{ work_dict|hash_score:index }} /  評分者：{{ work_dict|hash_scorer:index|nickname }}</Td></tr>           
-            {% else %}
-            <tr><td>分數</td><td>尚未評分</td></tr>                                   
-            {% endif %}              
-        {% endif %}
-        {% if not work_dict|hash_score:index > 0 %}      
-            <tr><td>作品檔案</td><td><input id="id_file" name="file" type="file" class="form-control"></td></tr>
-            <tr><td valign="top"><lable id="result">心得感想</lable></td><td><textarea cols="20" id="id_memo{{index}}" name="memo" rows="5"  class="form-control">{{ work_dict|hash_memo:index }}</textarea></td></tr>              
-            <tr><td></td><td><input type="submit" value="送出"  class="form-control btn-info"/></td></tr>
-        {% endif %}         
-              </table>
-      {% csrf_token %}   
-            </form>
-
-{% if work_dict|hash_memo:index %}
-
-{% endif %}
-        {% with workfiles=work_dict|hash_files:index %}
-
-        {% for workfile in workfiles %}		
-              <BR>第{{workfiles|length|subtract:forloop.counter|add:1}}版：<A href="/student/work/download/{{typing}}/{{lesson_id}}/{{index}}/{{request.user.id}}/{{workfile.id}}">{{workfile.upload_date}}</A>
-        {% endfor %}
-        {% endwith %}
 {% endblock %}
-
+{% block content %}
+  
+  {% if work_dict|hash_scorer:index > 0 %}
+  <button class="btn">
+    分數：{{work_dict|hash_score:index}} / 評分者：{{work_dict|hash_scorer:index|nickname}}
+</button>
+<BR><BR>
+  {% endif %}
+<form name="myForm" id="form{{index}}" action="/student/work/submit/{{typing}}/{% if 'B' in lesson %}2{% elif 'C' in lesson %}3{% elif 'D' in lesson %}4{% elif 'E' in lesson %}5{% else %}{{lesson}}{% endif %}/{{index}}/" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">{% csrf_token %}
+    <input type="hidden" name="lesson" value={{lesson}}>
+    <div class="form-group">
+        <label for="exampleFormControlTextarea1"><div id="result">心得感想：</div></label>
+        <textarea class="form-control" id="id_memo{{index}}" rows="3" name="memo">{{work_dict|hash_memo:index}}</textarea>
+    </div>
+    <div class="form-group">
+        {% with helps=work_dict|hash_helps:index %}
+        <label for="exampleFormControlSelect2">創作過程：</label>
+        <select class="form-control" name="helps">
+            <option value=0 {% if helps == 0 %} selected {% endif %}>全部靠自己想</option>
+            <option value=1 {% if helps == 1 %} selected {% endif %}>同學幫一點忙</option>
+            <option value=2 {% if helps == 2 %} selected {% endif %}>同學幫很多忙</option>
+            <option value=3 {% if helps == 3 %} selected {% endif %}>解答幫一點忙</option>
+            <option value=4 {% if helps == 4 %} selected {% endif %}>解答幫很多忙</option>
+            <option value=5 {% if helps == 5 %} selected {% endif %}>老師幫一點忙</option>
+            <option value=6 {% if helps == 6 %} selected {% endif %}>老師幫很多忙</option>
+        </select>
+        {% endwith %}
+    </div>
+    <div class="form-group">
+        <label for="exampleFormControlTextarea1">程式碼：</label>
+        <textarea class="form-control" id="id_code{{index}}" rows="5" name="code">{{work_dict|hash_code:index}}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="exampleFormControlTextarea1">執行結果：</label>
+        {% if work_dict|hash_scorer:index == 0 %}
+        <div id="edit-box{{index}}" class="form-control target" contenteditable="true" style="height:auto">
+            {% if work_dict|hash_workid:index %} 如果變更擷圖，請刪除原圖後重貼...
+            <img width=880 src="/{{ work_dict|hash_picture:index }}" /> 
+            {% else %}
+            請在此貼上螢幕擷圖... 
+            {% endif %}
+        </div>
+        <input id="screenshot{{index}}" name="screenshot" type="hidden" value="" />
+        <div class="form-group">
+            <input id="submit" type="submit" class="btn-info" value="送出" />
+        </div>
+        {% else %}
+        <div>
+            <div id="edit-box{{index}}"></div>
+            <img width=880 src="/{{ work_dict|hash_picture:index }}">
+        </div>
+        {% endif %}
+    </div>
+</form>
+<br>
+<table class="table">
+    <tr>
+        {% if work_dict|hash_date:index %}
+        <td>
+            <a href="/student/work/show/{{typing}}/{{lesson_id}}/{{index}}/{{user.id}}">觀看({{work_dict|hash_date:index}})</a>
+        </td>
+        {% endif %}
+        {% if lesson_id == 2 and index < 18 %}
+        <td>
+            <a href="/student/work/answer/{{lesson_id}}/{{index}}">解答</a>
+        </td>
+        {% endif %}
+    </tr>
+</table>
+{% endblock %}
 {% block footer_script %}
-<script>
 function wordCount( val ){
     var clean_message = val.replace(/\[m_\d+#\d+:\d+:\d+\]/g, '');
     var chinese = clean_message.match(/[\u4E00-\u9FA5]/g);
@@ -65,16 +134,18 @@ function wordCount( val ){
       chars : chinese ? chinese.length : 0,
 		};
 }
-$('#id_memo').on('input', function(e){
+
+$('#id_memo{{index}}').on('input', function(e){
     var v = wordCount(e.target.value);
-    if ($(this).val().length > 1000) {
+    if (v.words + v.chars > 500) {
       // Split the string on first 200 words and rejoin on spaces
-      alert("心得最多只能輸入1000個字元")
-      $(this).val(e.target.value.substring(0, 1000));
+      $(this).val($(this).val().substring(0, 500));
     }
     else {
+  console.log(e.target.value);
   $('#result').html("心得感想：(英:" + v.words + " / 中: " + v.chars + ")");
+  $('input#memo_e').val(v.words);
+  $('input#memo_c').val(v.chars);
     }
 });
-</script>
 {% endblock %}
