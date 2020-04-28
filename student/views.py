@@ -244,6 +244,12 @@ def submit(request, typing, lesson, index):
         if request.method == 'POST':
             form = SubmitAForm(request.POST, request.FILES)
             if form.is_valid():
+                # credit
+                answers = Answer.objects.filter(lesson_id=lesson, index=index, student_id=request.user.id)
+                if len(answers)>0 :
+                    points = 1
+                else :
+                    points = 3                
                 try:
                     work = Work.objects.get(typing=typing, lesson=lesson, index=index, user_id=request.user.id)
                 except ObjectDoesNotExist:
