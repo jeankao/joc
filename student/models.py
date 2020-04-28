@@ -109,6 +109,17 @@ class Work(models.Model):
         return User.objects.get(id=self.user_id)
 
 
+#解答
+class Answer(models.Model):
+    student_id = models.IntegerField(default=0)
+    lesson_id = models.IntegerField(default=0)
+    index = models.IntegerField()
+
+    def __unicode__(self):
+        user = User.objects.filter(id=self.student_id)[0]
+        index = self.index
+        return user.first_name+"("+str(index)+")"
+
 class WorkFile(models.Model):
     work_id = models.IntegerField(default=0)
     filename = models.TextField()
