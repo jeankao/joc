@@ -255,7 +255,7 @@ def submit(request, typing, lesson, index):
                 except ObjectDoesNotExist:
                     update_avatar(request.user.id, 1, points)
                     # History
-                    history = PointHistory(user_id=request.user.id, kind=1, message=str(points)+'分--繳交作業<'+lesson_name+'>', url="/student/work/show/"+lesson+"/"+index)
+                    history = PointHistory(user_id=request.user.id, kind=1, message=str(points)+'分--繳交作業<'+lesson_name+'>', url="/student/work/show/"+str(lesson)+"/"+str(index))
                     history.save()
                     profile = Profile.objects.get(user=request.user)
                 except MultipleObjectsReturned:
