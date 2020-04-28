@@ -79,7 +79,7 @@ class Work(models.Model):
 		]
 
     user_id = models.IntegerField(default=0)
-    lesson_id = models.IntegerField(default=0)
+    lesson = models.IntegerField(default=0)
     typing = models.IntegerField(default=0)
     index = models.IntegerField()
     memo = models.TextField()
