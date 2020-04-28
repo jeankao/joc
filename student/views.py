@@ -283,7 +283,7 @@ def submit(request, typing, lesson, index):
                     work.memo=form.cleaned_data['memo'][0:500]
                     work.helps=form.cleaned_data['helps']
                 work.save()
-                return redirect("/student/work/show/"+str(typing)+"/"+str(lesson+)"/"+str(index)+"/"+str(request.user.id))
+                return redirect("/student/work/show/"+str(typing)+"/"+str(lesson)+"/"+str(index)+"/"+str(request.user.id))
             return redirect('/student/lesson/'+request.POST.get("lesson", ""))
     return render(request, 'student/submit.html', {'form':form, 'typing':typing, 'lesson': lesson, 'lesson_id':lesson, 'index':index, 'work_dict':work_dict})
 
