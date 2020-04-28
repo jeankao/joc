@@ -18,6 +18,7 @@ from uuid import uuid4
 from django.contrib.auth.decorators import login_required
 import jieba
 import json
+from binascii import a2b_base64
 from django.db.models import Q
 from django.http import JsonResponse
 import time
