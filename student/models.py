@@ -74,6 +74,7 @@ class Work(models.Model):
     publication_date = models.DateTimeField(default=timezone.now)
     score = models.IntegerField(default=-1)
     scorer = models.IntegerField(default=0)
+    helps = models.IntegerField(default=0)    
     # scratch
     file = models.FileField()
     comment = models.TextField()	
