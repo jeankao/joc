@@ -64,6 +64,8 @@ class WorkGroup(models.Model):
     class Meta:
         unique_together = ('classroom_id', 'index', 'typing')	
 
+def upload_path_handler(instance, filename):
+    return "static/certificate/0/{filename}".format(filename=instance.id+".jpg")
 
 class Work(models.Model):
     HELP_CHOICES = [
