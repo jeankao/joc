@@ -278,7 +278,7 @@ def submit(request, typing, lesson, index):
             if len(workfiles)>0 and works[0].scorer>0: 
                 score_name = User.objects.get(id=works[0].scorer).first_name
                 scores = [works[0].score, score_name]	
-    return render(request, 'student/submitA.html', {'work_dict':work_dict, 'assignment':assignment, 'index':index, 'form': form, 'lesson':lesson, 'scores':scores, 'workfiles': workfiles})
+    return render(request, 'student/submitA.html', {'typing':typing, 'work_dict':work_dict, 'assignment':assignment, 'index':index, 'form': form, 'lesson':lesson, 'scores':scores, 'workfiles': workfiles})
 		
         
 # 列出所有作業        
