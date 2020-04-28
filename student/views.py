@@ -228,7 +228,7 @@ def lesson(request, lesson, unit):
 def submit(request, typing, lesson, index):
     work_dict = {}
     form = None
-    work_dict = dict(((int(work.index), [work, WorkFile.objects.filter(work_id=work.id).order_by("-id")]) for work in Work.objects.filter(typing=typing, lesson_id=lesson, user_id=request.user.id)))
+    work_dict = dict(((int(work.index), [work, WorkFile.objects.filter(work_id=work.id).order_by("-id")]) for work in Work.objects.filter(typing=typing, lesson=lesson, user_id=request.user.id)))
     if typing == "0":
         if lesson in ["2", "3", "4", "5", "6", "7", "8", "9", "10"]:
             lesson_name = [lesson_list2, lesson_list3, lesson_list4, lesson_list2, lesson_list6, lesson_list2, lesson_list5, lesson_list2, lesson_list7][int(lesson)-2][int(index)-1][1]
@@ -243,7 +243,7 @@ def submit(request, typing, lesson, index):
             form = SubmitAForm(request.POST, request.FILES)
             if form.is_valid():
                 try:
-                    work = Work.objects.get(typing=typing, lesson_id=lesson, index=index, user_id=request.user.id)
+                    work = Work.objects.get(typing=typing, lesson=lesson, index=index, user_id=request.user.id)
                 except ObjectDoesNotExist:
                     update_avatar(request.user.id, 1, points)
                     # History
@@ -252,7 +252,7 @@ def submit(request, typing, lesson, index):
                     profile = Profile.objects.get(user=request.user)
                 except MultipleObjectsReturned:
                     pass
-                work = Work(typing=typing, lesson_id=lesson, index=index, user_id=request.user.id)
+                work = Work(typing=typing, lesson=lesson, index=index, user_id=request.user.id)
                 work.save()
 
                 dataURI = form.cleaned_data['screenshot']
@@ -285,7 +285,7 @@ def submit(request, typing, lesson, index):
                 work.save()
                 return redirect("/student/work/show/"+str(typing)+"/"+str(lesson)+"/"+str(index)+"/"+str(request.user.id))
             return redirect('/student/lesson/'+request.POST.get("lesson", ""))
-    return render(request, 'student/submit.html', {'form':form, 'typing':typing, 'lesson': lesson, 'lesson_id':lesson, 'index':index, 'work_dict':work_dict})
+    return render(request, 'student/submit.html', {'form':form, 'typing':typing, 'lesson': lesson, 'lesson':lesson, 'index':index, 'work_dict':work_dict})
 
 # 列出所有作業        
 def work(request, typing, classroom_id):
