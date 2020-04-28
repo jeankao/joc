@@ -235,7 +235,7 @@ def submit(request, typing, lesson, index):
         if lesson in [2, 3, "4", "5", "6", "7", "8", "9", "10"]:
             lesson_name = [lesson_list2, lesson_list3, lesson_list4, lesson_list2, lesson_list6, lesson_list2, lesson_list5, lesson_list2, lesson_list7][int(lesson)-2][int(index)-1][1]
         else:
-            lesson_name = lesson_list[0][1][index-1][0]
+            lesson_name = "temp"
     elif typing == 1:
         lesson_name = TWork.objects.get(id=index).title
 
