@@ -66,18 +66,36 @@ class WorkGroup(models.Model):
 
 
 class Work(models.Model):
+    HELP_CHOICES = [
+            (0, "全部靠自己想"),
+            (1, "同學幫一點忙"),
+            (2, "同學幫很多忙"),
+            (3, "解答幫一點忙"),
+            (4, "解答幫很多忙"),
+            (5, "老師幫一點忙"),
+            (6, "老師幫很多忙"),
+		]
+
     user_id = models.IntegerField(default=0)
-    lesson = models.IntegerField(default=0)
+    lesson_id = models.IntegerField(default=0)
     typing = models.IntegerField(default=0)
     index = models.IntegerField()
     memo = models.TextField()
+    memo_c = models.IntegerField(default=0)
+    memo_e = models.IntegerField(default=0)    
+    publish = models.BooleanField(default=False)        
     publication_date = models.DateTimeField(default=timezone.now)
-    score = models.IntegerField(default=-1)
+    score = models.IntegerField(default=-2)
     scorer = models.IntegerField(default=0)
-    helps = models.IntegerField(default=0)    
-    # scratch
+	# scratch, microbit
     file = models.FileField()
-    comment = models.TextField()	
+    #　python
+    picture = models.ImageField(upload_to = upload_path_handler, default = '/static/python/null.jpg')
+    code = models.TextField(default='')
+    helps = models.IntegerField(default=0, choices=HELP_CHOICES)
+    answer = models.BooleanField(default=False)
+    youtube = models.TextField(default='')
+    comment = models.TextField(default='')
 
     def __unicode__(self):
         user = User.objects.filter(id=self.user_id)[0]
@@ -87,6 +105,7 @@ class Work(models.Model):
     @property
     def user(self):
         return User.objects.get(id=self.user_id)
+
 
 class WorkFile(models.Model):
     work_id = models.IntegerField(default=0)
