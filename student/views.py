@@ -231,12 +231,12 @@ def submit(request, typing, lesson, index):
     work_dict = {}
     form = None
     work_dict = dict(((int(work.index), [work, WorkFile.objects.filter(work_id=work.id).order_by("-id")]) for work in Work.objects.filter(typing=typing, lesson=lesson, user_id=request.user.id)))
-    if typing == "0":
-        if lesson in ["2", "3", "4", "5", "6", "7", "8", "9", "10"]:
+    if typing == 0:
+        if lesson in [2, 3, "4", "5", "6", "7", "8", "9", "10"]:
             lesson_name = [lesson_list2, lesson_list3, lesson_list4, lesson_list2, lesson_list6, lesson_list2, lesson_list5, lesson_list2, lesson_list7][int(lesson)-2][int(index)-1][1]
         else:
-            lesson_name = lesson_list1[int(index)-1][2]
-    elif typing == "1":
+            lesson_name = lesson_list[int(index)-1][2]
+    elif typing == 1:
         lesson_name = TWork.objects.get(id=index).title
 
 
