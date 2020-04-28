@@ -226,61 +226,67 @@ def lesson(request, lesson, unit):
     return render(request, 'student/lesson.html', {'exercises': exercises, 'unit':unit, 'lesson':lesson, 'page':page})
 
 def submit(request, typing, lesson, index):
-    lesson_dict = OrderedDict()
     work_dict = {}
-    work_dict = dict(((int(work.index), [work, WorkFile.objects.filter(work_id=work.id).order_by("-id")]) for work in Work.objects.filter(typing=typing, lesson=lesson, user_id=request.user.id)))
-    works = Work.objects.filter(typing=typing, user_id=request.user.id, lesson=lesson, index=index).order_by("-id")
-    if typing == 0: 
-        for i, unit in enumerate(lesson_list[int(lesson)-1][1]):
-            lesson_dict[i] = unit[0]
-        assignment = lesson_dict[index]
-    elif typing == 1:
-        assignment = TWork.objects.get(id=index).title
-    scores = []
-    workfiles = []
-    try:
-        filepath = request.FILES['file']
-    except :
-        filepath = False
-    if request.method == 'POST':
-        if filepath :
-            myfile = request.FILES['file']
-            fs = FileSystemStorage(settings.BASE_DIR+"/static/work/"+str(request.user.id)+"/")
-            filename = uuid4().hex
-            fs.save(filename, myfile)
-			
-        form = SubmitAForm(request.POST, request.FILES)
-        if not works.exists():
+    form = None
+    work_dict = dict(((int(work.index), [work, WorkFile.objects.filter(work_id=work.id).order_by("-id")]) for work in Work.objects.filter(typing=typing, lesson_id=lesson, user_id=request.user.id)))
+    if typing == "0":
+        if lesson in ["2", "3", "4", "5", "6", "7", "8", "9", "10"]:
+            lesson_name = [lesson_list2, lesson_list3, lesson_list4, lesson_list2, lesson_list6, lesson_list2, lesson_list5, lesson_list2, lesson_list7][int(lesson)-2][int(index)-1][1]
+        else:
+            lesson_name = lesson_list1[int(index)-1][2]
+    elif typing == "1":
+        lesson_name = TWork.objects.get(id=index).title
+
+
+    if lesson == 1 :
+        if request.method == 'POST':
+            form = SubmitAForm(request.POST, request.FILES)
             if form.is_valid():
-                work = Work(typing=typing, lesson=lesson, index=index, user_id=request.user.id, memo=form.cleaned_data['memo'], publication_date=timezone.now())
+                try:
+                    work = Work.objects.get(typing=typing, lesson_id=lesson, index=index, user_id=request.user.id)
+                except ObjectDoesNotExist:
+                    update_avatar(request.user.id, 1, points)
+                    # History
+                    history = PointHistory(user_id=request.user.id, kind=1, message=str(points)+'分--繳交作業<'+lesson_name+'>', url="/student/work/show/"+lesson+"/"+index)
+                    history.save()
+                    profile = Profile.objects.get(user=request.user)
+                except MultipleObjectsReturned:
+                    pass
+                work = Work(typing=typing, lesson_id=lesson, index=index, user_id=request.user.id)
                 work.save()
-                workfile = WorkFile(work_id=work.id, filename=filename)
-                workfile.save()
-	     		# credit
-                update_avatar(request.user.id, 1, 2)
-                # History
-                history = PointHistory(user_id=request.user.id, kind=1, message='2分--繳交作業<'+assignment+'>', url='/student/work/show/'+str(typing)+'/'+str(lesson)+'/'+str(index)+'/'+str(request.user.id))
-                history.save()
-        else:
-            if form.is_valid():
-                works.update(memo=form.cleaned_data['memo'],publication_date=timezone.localtime(timezone.now()))
-                workfile = WorkFile(work_id=works[0].id, filename=filename)
-                workfile.save()
-            else :
-                works.update(memo=form.cleaned_data['memo'])           
-        return redirect('/student/work/show/'+str(typing)+'/'+str(lesson)+'/'+str(index)+'/'+str(request.user.id))
-    else:
-        if not works.exists():
-            form = SubmitAForm()
-        else:
-            workfiles = WorkFile.objects.filter(work_id=works[0].id).order_by("-id")							
-            form = SubmitAForm(instance=works[0])
-            if len(workfiles)>0 and works[0].scorer>0: 
-                score_name = User.objects.get(id=works[0].scorer).first_name
-                scores = [works[0].score, score_name]	
-    return render(request, 'student/submitA.html', {'typing':typing, 'work_dict':work_dict, 'assignment':assignment, 'index':index, 'form': form, 'lesson':lesson, 'scores':scores, 'workfiles': workfiles})
-		
-        
+
+                dataURI = form.cleaned_data['screenshot']
+                try:
+                    head, data = dataURI.split(',', 1)
+                    mime, b64 = head.split(';', 1)
+                    mtype, fext = mime.split('/', 1)
+                    binary_data = a2b_base64(data)
+
+                    prefix = ['static/work/vphysics', 'static/work/euler', 'static/work/ck', 'static/work/vphysics2', '', 'static/work/pandas', 'static/work/django'][int(lesson) - 2]
+                    directory = "{prefix}/{uid}/{index}".format(prefix=prefix, uid=request.user.id, index=index)
+                    image_file = "{path}/{id}.jpg".format(path=directory, id=work.id)
+
+                    if not os.path.exists(settings.BASE_DIR + "/" + directory):
+                        os.makedirs(settings.BASE_DIR + "/" + directory)
+                    with open(settings.BASE_DIR + "/" + image_file, 'wb') as fd:
+                        fd.write(binary_data)
+                        fd.close()
+                    work.picture=image_file
+                except ValueError:
+                    path = dataURI.split('/', 3)
+                    work.picture=path[3]
+                    pass
+                if lesson == "8":
+                    work.memo=form.cleaned_data['memo'][0:500]
+                else :
+                    work.code=form.cleaned_data['code']
+                    work.memo=form.cleaned_data['memo'][0:500]
+                    work.helps=form.cleaned_data['helps']
+                work.save()
+                return redirect("/student/work/show/"+str(typing)+"/"+str(lesson+)"/"+str(index)+"/"+str(request.user.id))
+            return redirect('/student/lesson/'+request.POST.get("lesson", ""))
+    return render(request, 'student/submit.html', {'form':form, 'typing':typing, 'lesson': lesson, 'lesson_id':lesson, 'index':index, 'work_dict':work_dict})
+
 # 列出所有作業        
 def work(request, typing, classroom_id):
     classroom = Classroom.objects.get(id=classroom_id)
