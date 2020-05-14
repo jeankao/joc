@@ -3,22 +3,24 @@
 <p>和的平方：將一群數字相加後再計算其平方的值。</p>
 <p>【最後目標】</p>
 <p>找出前100個自然數，其和的平方與平方的和，求兩個計算結果的差值。</p>
-<p>練習1：求1~10數字平方的和</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
-    <span class="nb">sum</span> <span class="o">=</span> <span class="nb">sum</span> <span class="o">+</span> <span class="n">i</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="k">print</span><span class="p">(</span><span class="nb">sum</span><span class="p">)</span>
-</pre></div>
-</div>
 
-<iframe width="800" height="320" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=sum%20%3D%200%0Afor%20i%20in%20range%281,%2011%29%3A%0A%20%20%20%20sum%20%3D%20sum%20%2B%20i%20**%202%0Aprint%28sum%29&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"> </iframe>
+{% for exercise in exercises %}
+<div class="card card-default">   
+    <div class="card-header"><button type="button" class="btn btn-info">練習{{forloop.counter}}</button>
+        {{exercise.0}} 
+      <a id="expand{{forloop.counter}}" onclick="return false;" href="#" data-contentid="{{forloop.counter}}" class="expand btn btn-success" role="btn" style="display:inline">展開</a> 
+      <a id="close{{forloop.counter}}" onclick="return false;" href="#" data-contentid="{{forloop.counter}}" class="unexpand btn btn-success" role="btn" style="display:none">關閉</a>
+      </div>               
+     <div id="memo{{forloop.counter}}" class="card-body" data-contentid="1" style="display:none">
+        <BR>
+        {% if forloop.counter == 1 %}
+        <img src="/static/lesson/{{lesson}}/6_1.png"> 
+        <iframe width="800" height="320" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=sum%20%3D%200%0Afor%20i%20in%20range%281,%2011%29%3A%0A%20%20%20%20sum%20%3D%20sum%20%2B%20i%20**%202%0Aprint%28sum%29&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"> </iframe>     
+        {% elif forloop.counter == 2 %}
+        <img src="/static/lesson/{{lesson}}/6_2.png"> 
+        <iframe width="800" height="320" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=sum%20%3D%200%0Afor%20i%20in%20range%281,%2011%29%3A%0A%20%20%20%20sum%20%3D%20sum%20%2B%20i%0Aprint%28sum**2%29&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"> </iframe>        
+        {% endif %}
+      </div>
+   </div>
+{% endfor %}
 
-<p>練習2:求1~10數字和的平方</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
-    <span class="nb">sum</span> <span class="o">=</span> <span class="nb">sum</span> <span class="o">+</span> <span class="n">i</span>
-<span class="k">print</span><span class="p">(</span><span class="nb">sum</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-</pre></div>
-</div>
-
-<iframe width="800" height="320" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=sum%20%3D%200%0Afor%20i%20in%20range%281,%2011%29%3A%0A%20%20%20%20sum%20%3D%20sum%20%2B%20i%0Aprint%28sum**2%29&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"> </iframe>
