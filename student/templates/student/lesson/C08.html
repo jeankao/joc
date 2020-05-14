@@ -24,34 +24,21 @@
 <p>在這個50行*20列=1000個數字串中，將所有相鄰的4個數字相乘所得的乘積中，最大的一組是 9×9×8×9=5832</p>
 <p>【最後目標】</p>
 <p>在這個50行*20列=1000個數字串中，將所有相鄰的13個數字相乘所得的乘積中，請求出最大的乘積。</p>
-<p>練習1：從檔案讀取數字串 </p>
-<p><a href="/static/files/euler/numbers.txt">下載檔案</a>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># -*- coding: UTF-8 -*-</span>
-<span class="n">numbers</span> <span class="o">=</span> <span class="p">[]</span>
+<p><a href="/static/files/numbers.txt">下載檔案</a>
 
-<span class="c"># 打開檔案</span>
-<span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;d:/numbers.txt&quot;</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
-
-<span class="c"># 讀取檔案</span>
-<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>    <span class="c">#依序讀取每行</span>
-    <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>    <span class="c">#去掉每行頭尾空白</span>
-    <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">line</span> <span class="p">:</span>
-        <span class="n">numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">char</span><span class="p">))</span>
-
-<span class="c"># 關閉檔案</span>
-<span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
-</pre></div>
+{% for exercise in exercises %}
+<div class="card card-default">
+    <div class="card-header"><button type="button" class="btn btn-info">練習{{forloop.counter}}</button>
+        {{exercise.0}}
+        <a id="expand{{forloop.counter}}" onclick="return false;" href="#" data-contentid="{{forloop.counter}}" class="expand btn btn-success" role="btn" style="display:inline">展開</a>
+        <a id="close{{forloop.counter}}" onclick="return false;" href="#" data-contentid="{{forloop.counter}}" class="unexpand btn btn-success" role="btn" style="display:none">關閉</a>
+    </div>
+    <div id="memo{{forloop.counter}}" class="card-body" data-contentid="1" style="display:none">
+        <img src="/static/lesson/{{lesson}}/{{unit}}_{{forloop.counter}}.png">
+        <BR>
+        {% if forloop.counter == 2 %}
+        <iframe width="800" height="330" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=numbers%20%3D%20%5B9,9,8,9%5D%0A%0Aproduct%20%3D%201%0Afor%20i%20in%20range%284%29%3A%0A%20%20%20%20product%20%3D%20product%20*%20numbers%5Bi%5D%0Aprint%28product%29&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"></iframe>
+        {% endif %}
+    </div>
 </div>
-<p>練習2:求串列中4個數字的乘積</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">numbers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]</span>
-
-<span class="n">product</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
-    <span class="n">product</span> <span class="o">=</span> <span class="n">product</span> <span class="o">*</span> <span class="n">numbers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-<span class="k">print</span><span class="p">(</span><span class="n">product</span><span class="p">)</span>
-</pre></div>
-</div>
-
-<iframe width="800" height="330" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=numbers%20%3D%20%5B9,9,8,9%5D%0A%0Aproduct%20%3D%201%0Afor%20i%20in%20range%284%29%3A%0A%20%20%20%20product%20%3D%20product%20*%20numbers%5Bi%5D%0Aprint%28product%29&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"> </iframe>
+{% endfor %}

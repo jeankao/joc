@@ -2,6 +2,10 @@
 {% load tag %}
 
 {% block header %}
+  <!-- MathJax: Begin -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <!-- MathJax: End -->
   {% if user.is_authenticated %}
     <!-- Annotation Assets: Begin -->
     <link rel="stylesheet" href="/static/scripts/annotator/annotator.min.css" type="text/css" media="all" />
@@ -23,11 +27,11 @@
 {% endblock %}
 
 {% block domready %}
-  {%if user.is_authenticated %}
+  {% if user.is_authenticated %}
   // Annotation //
   userAnnotationInit({{ user.id }}, {{ lesson }}, {{ unit }});
   {% endif %}
-  {% endblock %}
+{% endblock %}
 
 {% block footer_script %}
 $('a.expand').click(function(e){

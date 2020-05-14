@@ -1,26 +1,21 @@
 <h1>(16)數字和</h1>
-<p>2^10 = 1024，將這個展開後的數字拆開相加，1+0+2+4=7，可以得到數字和7</p>
+<p>\(2^{10} = 1024\)，將這個展開後的數字拆開相加，1+0+2+4=7，可以得到數字和7</p>
 <p>【最後目標】</p>
-<p>將 2^1000 展開後的數字拆開相加，求數字和。</p>
-<BR>
-<p>練習1：求數字和</p>
-<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">number</span> <span class="o">=</span> <span class="mi">10715086071862673209</span>
-<span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="k">for</span> <span class="n">digit</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
-    <span class="nb">sum</span> <span class="o">=</span> <span class="nb">sum</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">digit</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="nb">sum</span><span class="p">)</span>
-</pre></div>
-</td></tr></table></div>
+<p>將 \(2^{1000}\) 展開後的數字拆開相加，求數字和。</p>
 
-<iframe width="800" height="330" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=number%20%3D%2010715086071862673209%0Asum%20%3D%200%0Afor%20digit%20in%20str%28number%29%3A%0A%20%20%20%20sum%20%3D%20sum%20%2B%20int%28digit%29%0Aprint%28sum%29&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"> </iframe>
-
-<BR>
-<p>練習2：求2的10次方展開後數字</p>
-<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">10</span><span class="p">)</span>
-</pre></div>
-</td></tr></table></div>
-
+{% for exercise in exercises %}
+<div class="card card-default">
+    <div class="card-header"><button type="button" class="btn btn-info">練習{{forloop.counter}}</button>
+        {{exercise.0}}
+        <a id="expand{{forloop.counter}}" onclick="return false;" href="#" data-contentid="{{forloop.counter}}" class="expand btn btn-success" role="btn" style="display:inline">展開</a>
+        <a id="close{{forloop.counter}}" onclick="return false;" href="#" data-contentid="{{forloop.counter}}" class="unexpand btn btn-success" role="btn" style="display:none">關閉</a>
+    </div>
+    <div id="memo{{forloop.counter}}" class="card-body" data-contentid="1" style="display:none">
+        <img src="/static/lesson/{{lesson}}/{{unit}}_{{forloop.counter}}.png">
+        <BR>
+        {% if forloop.counter == 1 %}
+        <iframe width="800" height="330" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=number%20%3D%2010715086071862673209%0Asum%20%3D%200%0Afor%20digit%20in%20str%28number%29%3A%0A%20%20%20%20sum%20%3D%20sum%20%2B%20int%28digit%29%0Aprint%28sum%29&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"></iframe>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
