@@ -29,9 +29,36 @@ Annotator.Plugin.Image = function(element) {
                     .height(height);
                 $(img).parent().append(div);
                 if (annotation) {
-                    $(div).data('annotation', annotation)
-                        .data('annotation-id', annotation.id);
+                    $(div).data('annotation-id', annotation.id)
+                        .data('annotation', annotation);
                     $(div).off('mouseover');
+                    $(div).on('mouseover', function(event) {
+                        var pos = $(event.target).position();
+                        var x = pos.left + event.offsetX;
+                        var y = pos.top + event.offsetY;
+                        var annotations = [];
+                        $('.annotator-img-rect', $(img).parent()).each(function(index, item) {
+                            let rect = {
+                                left: item.offsetLeft, 
+                                top: item.offsetTop, 
+                                right: item.offsetLeft + item.offsetWidth, 
+                                bottom: item.offsetTop + item.offsetHeight,
+                            };
+                            if (x > rect.left && x < rect.right && y > rect.top && y < rect.bottom) {
+                                annotations.push($(item).data('annotation'));
+                            }
+                        });
+                        if (annotations.length > 1) {
+                            window.setTimeout(function() {
+                                let c = $('.annotate').offset();
+                                let r = $(img).parent().offset();
+                                annotator.showViewer(annotations, {
+                                    left: x + r.left - c.left,
+                                    top: y + r.top - c.top,
+                                });
+                            }, 100);
+                        }
+                    });
                 } else {
                     $(div).off('mouseover');
                     $(div).on('mouseover', function(event) {
@@ -150,9 +177,8 @@ Annotator.Plugin.Image = function(element) {
                         continue;
                     var img = $("img[src='"+item.img+"']", element)[0];
                     var rect = item.shapes[0].geometry;
-                    var imgWidth = $(img).width();
-                    var imgHeight = $(img).height();
-                        
+                    var imgWidth = img.width; //$(img).width();
+                    var imgHeight = img.height; //$(img).height();
                     createHighlight(rect.x * imgWidth, rect.y * imgHeight, rect.width * imgWidth, rect.height * imgHeight, img, item);
                 }
             });
@@ -219,23 +245,28 @@ Annotator.Plugin.Image = function(element) {
 }
 
 //---------------------------------------------------------------------------
-function userAnnotationInit(userid, lesson, unit) {
+function userAnnotationInit(userid, lesson, unit, name, classID = 0, groupID = 0, group = 0) {
     $('div.annotate').each(function(index, element) {
-        $(element).annotator()
+        $(element).annotator({readOnly: classID > 0})
             .annotator('addPlugin', 'Store', {
                 prefix: '/annotate', 
                 annotationData: {
                     'userid': userid,
                     'lesson': lesson, 
                     'unit': unit,
+                    'user': name,
                 },
                 loadFromSearch: {
                     'userid': userid,
                     'lesson': lesson, 
                     'unit': unit,
+                    'classID': classID,
+                    'groupID': groupID,
+                    'group': group,
                 },
             })
             .annotator('addPlugin', 'Touch')
-            .annotator('addPlugin', 'Image');
+            .annotator('addPlugin', 'Image')
+            .annotator('addPlugin', 'ExtraField');
     });
 }

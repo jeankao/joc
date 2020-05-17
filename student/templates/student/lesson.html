@@ -12,7 +12,7 @@
     <script type="text/javascript" src="/static/scripts/annotator/annotator-full.min.js"></script>
     <link rel="stylesheet" href="/static/scripts/annotator/annotator.touch.css" type="text/css" media="all" />
     <script type="text/javascript" src="/static/scripts/annotator/annotator.touch.min.js"></script>
-    <script type="text/javascript" src="/static/scripts/annotator/annotator.message.js"></script>
+    <script type="text/javascript" src="/static/scripts/annotator/annotator.extrafield.js"></script>
     <script type="text/javascript" src="/static/scripts/annotator/annotator.image.js"></script>
     <!-- Annotation Assets: End -->
   {% endif %}
@@ -23,13 +23,59 @@
     <div class="annotate">
     {% include page %}
     </div>
+    {% if classgroup %}
+    <hr>
+    <form id="groupFilter" method="POST">
+      {% csrf_token %}
+      <input type="hidden" id="classID" name="classID" value="">
+      <input type="hidden" id="groupID" name="groupID" value="">
+      <input type="hidden" id="group" name="group" value="">
+    </form>
+    <table id="classgroup-list" class="table table-sm">
+      <thead>
+        <tr>
+          <th colspan="2">查看班級學生標註</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cg in classgroup %}
+        <tr>
+          <td class="class-group">{{ cg.classname }}</span> <span class="badge badge-primary">{{ cg.title|default_if_none:"不分組" }}</span></td>
+          <td class="group-list" data-groupid="{{ cg.group_id }}" data-classid="{{ cg.classroom_id}}" data-groups="{{ cg.count|default_if_none:0 }}"></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
   {% endif %}
 {% endblock %}
 
 {% block domready %}
   {% if user.is_authenticated %}
   // Annotation //
-  userAnnotationInit({{ user.id }}, {{ lesson }}, {{ unit }});
+  userAnnotationInit({{ user.id }}, {{ lesson }}, {{ unit }}, '{{ user.first_name }}', {{ classID }}, {{ groupID }}, {{ group }});
+    {% if classgroup %}
+      function _addButton(container, index) {
+        var btn = document.createElement('button');
+        btn.classList.add('btn', 'btn-sm', 'btn-default', 'mr-1');
+        btn.innerText = (index == 0 ? "不分組" : `第 ${index} 組`);
+        $(btn).data('group', index);
+        $(btn).on('click', function(e) {
+          var item = e.target;
+          $('#classID').val($(item).parent().data('classid'));
+          $('#groupID').val($(item).parent().data('groupid'));
+          $('#group').val($(item).data('group'));
+          $('#groupFilter').submit();
+        });
+        $(container).append(btn);
+      }
+      $('td.group-list').each(function(index, item){
+        var count = $(item).data('groups');
+        for (var i = 0; i <= count; i++) {
+          _addButton(item, i);
+        }
+      });
+    {% endif %}
   {% endif %}
 {% endblock %}
 

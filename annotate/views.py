@@ -5,6 +5,8 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from .models import Annotation
 from django.urls import reverse
+from django.db.models import Subquery, OuterRef
+from student.models import Enroll, StudentGroup
 import json
 
 # Create your views here.
@@ -66,16 +68,32 @@ def get_annotation(req, aid):
     return response
 
 def search(req):
+    classid = req.GET.get('classID', default=0)
+    groupid = req.GET.get('groupID', default=0)
+    group = req.GET.get('group', default=0)
     userid = req.GET.get('userid', default=0)
     lesson = req.GET.get('lesson', default=0)
     unit = req.GET.get('unit', default=0)
-    qs = Annotation.objects.filter(lesson=lesson, unit=unit)
-    if userid == 0:
-        pass
+    qs = Annotation.objects.filter(lesson=lesson, unit=unit).annotate(
+        firstname = Subquery(
+            User.objects.filter(id=OuterRef('user_id')).values('first_name')[:1]
+        )
+    )
+    if classid == 0:
+        if userid == 0:
+            pass
+        else:
+            qs = qs.filter(user__id=userid)
     else:
-        qs = qs.filter(user__id=userid)
-    
-    annotations = [a for a in qs.order_by('id')]
+        stuids = []
+        if groupid == "0" or group == "0":
+            stuids = Enroll.objects.filter(classroom_id=classid).values_list('student_id', flat=True)
+        else:
+            stuids = StudentGroup.objects.filter(group_id=groupid, group=group).values_list('enroll_id', flat=True)
+        qs = qs.filter(user_id__in=stuids)
+    # return HttpResponse(str(qs.query))
+    #annotations = [a for a in qs.order_by('id')]
+    annotations = qs.order_by('id')
     total = len(annotations)
     rows = []
     for annotation in annotations:
@@ -83,6 +101,7 @@ def search(req):
         content['id'] = annotation.id
         content['created'] = annotation.created
         content['updated'] = annotation.updated
+        content['user'] = annotation.firstname
         if 'shapes' in content:
             content['ranges'] = [{'start': '', 'end': '', 'startOffset': 0, 'endOffset': 0}]
         rows.append(content)

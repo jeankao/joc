@@ -20,7 +20,7 @@ import jieba
 import json
 import os
 from binascii import a2b_base64
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Subquery
 from django.http import JsonResponse
 import time
 from datetime import date
@@ -51,23 +51,32 @@ def filename_browser(request, filename):
 
 # 判斷是否為授課教師
 def is_teacher(user, classroom_id):
-    if Classroom.objects.filter(teacher_id=user.id, id=classroom_id).exists():
-        return True
-    elif Assistant.objects.filter(user_id=user.id, classroom_id=classroom_id).exists():
-        return True
-    return False
+    # if Classroom.objects.filter(teacher_id=user.id, id=classroom_id).exists():
+    #     return True
+    # elif Assistant.objects.filter(user_id=user.id, classroom_id=classroom_id).exists():
+    #     return True
+    # return False
+    return Classroom.objects.filter(teacher_id=user.id, id=classroom_id).exists() \
+        or Assistant.objects.filter(user_id=user.id, classroom_id=classroom_id).exists()
 	
 # 判斷是否為同班同學
 def is_classmate(user, classroom_id):
-    enroll_pool = [enroll for enroll in Enroll.objects.filter(classroom_id=classroom_id).order_by('seat')]
-    student_ids = map(lambda a: a.student_id, enroll_pool)
-    classroom = Classroom.objects.get(id=classroom_id)
+    # enroll_pool = [enroll for enroll in Enroll.objects.filter(classroom_id=classroom_id).order_by('seat')]
+    # student_ids = map(lambda a: a.student_id, enroll_pool)
+    # classroom = Classroom.objects.get(id=classroom_id)
+    # if not classroom.online and not is_teacher(user, classroom_id):
+    #     return False
+    # if user.id in student_ids:
+    #     return True
+    # else:
+    #     return False		
+    stuids = Enroll.objects.filter(classroom_id=classroom_id).value_list('id', flat=True)
+    classtoom = Classroom.objects.get(id=classroom_id)
+    
     if not classroom.online and not is_teacher(user, classroom_id):
         return False
-    if user.id in student_ids:
-        return True
-    else:
-        return False		
+    
+    return user.id in stuids
 
 class ClassmateRequiredMixin(object):
     def dispatch(self, request, *args, **kwargs):
@@ -225,7 +234,20 @@ def lesson(request, lesson, unit):
     #     page = "student/lesson/C" + str(unit) + ".html"
     page = "student/lesson/C{:02d}.html".format(unit)
     exercises = lesson_list[lesson-1][1][unit-1][1]
-    return render(request, 'student/lesson.html', {'exercises': exercises, 'unit':unit, 'lesson':lesson, 'page':page})
+
+    classes = Classroom.objects.filter(teacher_id=request.user.id)
+    sq = ClassroomGroup.objects.filter(id=OuterRef('group_id'))
+    classgroup = WorkGroup.objects.filter(classroom_id__in=classes.values_list('id', flat=True), index=0).annotate(
+        title = Subquery(sq.values('title')[:1]), 
+        count = Subquery(sq.values('numbers')[:1]),
+        classname = Subquery(classes.filter(id=OuterRef('classroom_id')).values('name')),
+    ).values()
+
+    classid = request.POST.get('classID', default=0)
+    groupid = request.POST.get('groupID', default=0)
+    group = request.POST.get('group', default=0)
+
+    return render(request, 'student/lesson.html', {'exercises': exercises, 'unit':unit, 'lesson':lesson, 'page':page, 'classgroup': classgroup, 'classID': classid, 'groupID': groupid, 'group': group})
 
 def submit(request, typing, lesson, index):
     work_dict = {}

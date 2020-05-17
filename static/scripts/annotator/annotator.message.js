@@ -9,12 +9,15 @@ Annotator.Plugin.Message = function(element, types) {
         return '0' + n;
       return '' + n;
     }
-    return '' + d.getFullYear() + '/' + _(d.getMonth() + 1) + '/' + _(d.getDate()) + ' ' + _(d.getHours()) + ':' + _(d.getMinutes()) + ':' + _(d.getSeconds());
+    return `${d.getFullYear()}/${_(d.getMonth()+1)}/${_(d.getDate())} ${_(d.getHours())}:${_(d.getMinutes())}:${_(d.getSeconds())}`
+    //return '' + d.getFullYear() + '/' + _(d.getMonth() + 1) + '/' + _(d.getDate()) + ' ' + _(d.getHours()) + ':' + _(d.getMinutes()) + ':' + _(d.getSeconds());
   }
+  /*
   function modifyAnnotationClass(annotation) {
     if (annotation.highlights)
       $(annotation.highlights[0]).attr('class', 'annotator-hl atype-' + annotation.atype);
   }
+  */
   return {
     field: null,
     typefield: null,
@@ -22,6 +25,7 @@ Annotator.Plugin.Message = function(element, types) {
     pluginInit: function() {
       if (!Annotator.supported())
         return;
+      /*
       this.annotator.subscribe("annotationsLoaded", function(annotations) {
         for (let i in annotations) {
           let annoitem = annotations[i];
@@ -67,9 +71,10 @@ Annotator.Plugin.Message = function(element, types) {
           },
         });
       }
+      */
       this.annotator.viewer.addField({
         load: function(field, annotation) {
-          field.innerHTML = field.innerHTML = formatDateTime(new Date(annotation.created)) + " | " + annotation.supervisor;
+          field.innerHTML = /*field.innerHTML = */ formatDateTime(new Date(annotation.created)) + " | " + annotation.user;
         }
       });
     },
