@@ -26,10 +26,17 @@
         <a id="close{{forloop.counter}}" onclick="return false;" href="#" data-contentid="{{forloop.counter}}" class="unexpand btn btn-success" role="btn" style="display:none">關閉</a>
     </div>
     <div id="memo{{forloop.counter}}" class="card-body" data-contentid="1" style="display:none">
+        <img src="/static/lesson/{{lesson}}/{{unit}}_{{forloop.counter}}.png">
         {% if forloop.counter == 1 %}
         <p>集合(sets)是一組無序且沒有重複的元素。大括號或 set() 函式都可以用來創建集合。(注意：要創建一個空的集合，必須使用set()而不是{})</p>
+        <iframe width="800" height="500" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=a%20%3D%20set%28'abracadabra'%29%0Ab%20%3D%20set%28'alacazam'%29%0Aprint%28a%29%20%23%E5%8D%B0%E5%87%BA%E9%9B%86%E5%90%88a%0Aprint%28b%29%20%23%E5%8D%B0%E5%87%BA%E9%9B%86%E5%90%88b%0Aprint%28a-b%29%20%23%E5%B7%AE%E9%9B%86%EF%BC%9A%E5%9C%A8%E9%9B%86%E5%90%88a%E4%B8%AD%E4%BD%86%E4%B8%8D%E5%9C%A8%E9%9B%86%E5%90%88b%E4%B8%AD%E7%9A%84%E5%85%83%E7%B4%A0%E9%9B%86%E5%90%88%0Aprint%28a%7Cb%29%20%23%E8%81%AF%E9%9B%86%EF%BC%9A%E5%9C%A8%E9%9B%86%E5%90%88a%E6%88%96%E5%9C%A8%E9%9B%86%E5%90%88b%E4%B8%AD%E7%9A%84%E5%85%83%E7%B4%A0%E9%9B%86%E5%90%88%0Aprint%28a%26b%29%20%23%E4%BA%A4%E9%9B%86%EF%BC%9A%E5%9C%A8%E9%9B%86%E5%90%88a%E4%B8%94%E5%9C%A8%E9%9B%86%E5%90%88b%E4%B8%AD%E7%9A%84%E5%85%83%E7%B4%A0%E9%9B%86%E5%90%88%0Aprint%28a%5Eb%29%20%23%E5%9C%A8%E9%9B%86%E5%90%88a%E6%88%96%E9%9B%86%E5%90%88b%E4%B8%AD%EF%BC%8C%E4%BD%86%E4%B8%8D%E5%90%8C%E6%99%82%E5%AD%98%E5%9C%A8%E5%85%A9%E5%80%8B%E9%9B%86%E5%90%88&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"></iframe>
+        {% elif forloop.counter == 2 %}
+        <iframe width="800" height="500" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=def%20T%28number%29%3A%0A%20%20%20%20return%20number%20*%20%28number%20%2B%201%29%20//%202%0A%0Aprint%28T%28100%29%29&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"></iframe>
+        {% elif forloop.counter == 3 %}
+        <iframe width="800" height="500" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=def%20factors%28number%29%3A%0A%20%20%20%20result%20%3D%20set%28%29%0A%20%20%20%20for%20i%20in%20range%281,%20int%28number%20**%200.5%29%20%2B%201%29%3A%0A%20%20%20%20%20%20%20%20div,%20mod%20%3D%20divmod%28number,%20i%29%0A%20%20%20%20%20%20%20%20if%20mod%20%3D%3D%200%20%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20result%20%3D%20result%20%7C%20%7Bi,%20div%7D%0A%20%20%20%20return%20result%0A%0Afactor_set%20%3D%20factors%28100%29%0Aprint%28factor_set%29%0Aprint%28len%28factor_set%29%29&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"></iframe>
+        {% elif forloop.counter == 4 %}
+        <iframe width="800" height="500" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=number%20%3D%20100%0Afactor%20%3D%20number%20-%201%0Awhile%20True%3A%0A%20%20%20%20mod%20%3D%20number%20%25%20factor%0A%20%20%20%20if%20mod%20%3D%3D%200%3A%0A%20%20%20%20%20%20%20%20break%0A%20%20%20%20factor%20%3D%20factor-1%0Aprint%28factor%29&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"> </iframe>
         {% endif %}
-        <img src="/static/lesson/{{lesson}}/{{unit}}_{{forloop.counter}}.png">
     </div>
 </div>
 {% endfor %}

@@ -22,9 +22,11 @@
         <p>把相對應鍵放入「中括號([])」，即可查詢其值。</p>
         <img src="/static/lesson/{{lesson}}/4_2.png">        
         {% elif forloop.counter == 2 %}
-        <img src="/static/lesson/{{lesson}}/4_3.png"> 
+        <img src="/static/lesson/{{lesson}}/4_3.png">
+        <iframe width="800" height="500" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=numbers%20%3D%20%7B1%3A'%E5%A3%B9',%202%3A'%E8%B2%AE',%203%3A'%E5%8F%83',%204%3A'%E8%82%86',%205%3A'%E4%BC%8D',%206%3A'%E9%99%B8',%207%3A'%E6%9F%92',%208%3A'%E6%8D%8C',%209%3A'%E7%8E%96',%200%3A'%E9%9B%B6'%7D%0Adecimal%20%3D%20%7B0%3A'',%201%3A'%E6%8B%BE',%202%3A'%E7%99%BE',%203%3A'%E5%8D%83',%204%3A'%E8%90%AC'%7D%0Anumber%20%3D%2036294%0Acount%20%3D%200%0Astring%20%3D%20%22%22%0Awhile%20number%20%3E%200%3A%0A%20%20%20%20digit%20%3D%20number%20%25%2010%0A%20%20%20%20string%20%3D%20numbers%5Bdigit%5D%20%2B%20decimal%5Bcount%5D%20%2B%20string%0A%20%20%20%20number%20%3D%20number%20//%2010%0A%20%20%20%20count%20%3D%20count%20%2B%201%0Aprint%28string%29&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"></iframe>
         {% elif forloop.counter == 3 %}
-        <img src="/static/lesson/{{lesson}}/4_4.png"> 
+        <img src="/static/lesson/{{lesson}}/4_4.png">
+        <iframe width="800" height="500" frameborder="0" src="http://pythontutor.com/iframe-embed.html#code=number%20%3D%20int%28input%28'%E8%AB%8B%E8%BC%B8%E5%85%A5%E6%95%B8%E5%AD%97'%29%29%0Areverse%20%3D%200%0Awhile%20number%20%3E%200%3A%0A%20%20%20%20digit%20%3D%20number%20%25%2010%0A%20%20%20%20reverse%20%3D%20reverse%20*%2010%20%2B%20digit%0A%20%20%20%20number%20%3D%20number%20//%2010%0Aprint%28reverse%29%0A&codeDivHeight=400&codeDivWidth=350&cumulative=false&curInstr=0&heapPrimitives=nevernest&origin=opt-frontend.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"></iframe>
         {% endif %}
       </div>
    </div>

@@ -21,6 +21,7 @@ def reset():
     lesson_list[0][1].append(['回文數', []])
     lesson_list[0][1][3][1].append(['字典(Dictionary)', False, 16, 212207324, ["心智圖", "4_1.png"], False])  
     lesson_list[0][1][3][1].append(['國字數字轉換', False, 17, 212208431, ["心智圖", "4_2.png"], False])  
+    lesson_list[0][1][3][1].append(['反轉數字', False, 17, 212208431, ["心智圖", "4_2.png"], False])  
     lesson_list[0][1].append(['最小公倍數', []])
     lesson_list[0][1][4][1].append(['找出1,2,3,4,5,6,7,8,9, 10都能除盡的最小正整數。', "1_23.zip", 23, 201575462, False, False])  
     lesson_list[0][1][4][1].append(['運用輾轉相除法求兩數最大公因數(GCD)', "1_24.zip", 24, 201575481, False, False])
