@@ -70,13 +70,16 @@ def is_classmate(user, classroom_id):
     #     return True
     # else:
     #     return False		
-    stuids = Enroll.objects.filter(classroom_id=classroom_id).value_list('id', flat=True)
-    classtoom = Classroom.objects.get(id=classroom_id)
+    stuids = Enroll.objects.filter(classroom_id=classroom_id).values_list('student_id', flat=True)
+    classroom = Classroom.objects.get(id=classroom_id)
     
-    if not classroom.online and not is_teacher(user, classroom_id):
+    if not classroom.online:
         return False
     
-    return user.id in stuids
+    if user.id in stuids:
+        return True
+    else :
+        return False
 
 class ClassmateRequiredMixin(object):
     def dispatch(self, request, *args, **kwargs):
@@ -91,7 +94,7 @@ class ClassmateRequiredMixin(object):
         classroom = Classroom.objects.get(id=classroom_id)
         if len(profile.classroom) > 0 :		
             classroom_list = jsonDec.decode(profile.classroom)
-        if not classroom.online and not is_teacher(self.request.user, classroom_id):
+        if not classroom.online:
             return redirect("/")
         if str(classroom_id) in classroom_list :
             return super(ClassmateRequiredMixin, self).dispatch(request,*args, **kwargs)
