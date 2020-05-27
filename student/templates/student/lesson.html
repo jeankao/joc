@@ -23,29 +23,40 @@
     <div class="annotate">
     {% include page %}
     </div>
-    {% if classgroup %}
-    <hr>
+    {% if mygroup or classgroup %}
     <form id="groupFilter" method="POST">
       {% csrf_token %}
       <input type="hidden" id="classID" name="classID" value="">
       <input type="hidden" id="groupID" name="groupID" value="">
       <input type="hidden" id="group" name="group" value="">
     </form>
-    <table id="classgroup-list" class="table table-sm">
-      <thead>
-        <tr>
-          <th colspan="2">查看班級學生標註</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for cg in classgroup %}
-        <tr>
-          <td class="class-group">{{ cg.classname }}</span> <span class="badge badge-primary">{{ cg.title|default_if_none:"不分組" }}</span></td>
-          <td class="group-list" data-groupid="{{ cg.group_id }}" data-classid="{{ cg.classroom_id}}" data-groups="{{ cg.count|default_if_none:0 }}"></td>
-        </tr>
+      {% if mygroup %}
+      <hr>
+      <div id="mygroup-list">
+        查看同組成員標註：
+        {% for mg in mygroup %}
+        <button class="btn btn-sm" data-groupid="{{ mg.group_id }}" data-classid="{{ mg.classroom_id }}" data-group="{{ mg.group|default_if_none:0 }}">{{ mg.classname }}</button>
         {% endfor %}
-      </tbody>
-    </table>
+      </div>
+      {% endif %}
+      {% if classgroup %}
+      <hr>
+      <table id="classgroup-list" class="table table-sm">
+        <thead>
+          <tr>
+            <th colspan="2">查看班級學生標註</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cg in classgroup %}
+          <tr>
+            <td class="class-group">{{ cg.classname }}</span> <span class="badge badge-primary">{{ cg.title|default_if_none:"不分組" }}</span></td>
+            <td class="group-list" data-groupid="{{ cg.group_id }}" data-classid="{{ cg.classroom_id}}" data-groups="{{ cg.count|default_if_none:0 }}"></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
     {% endif %}
   {% endif %}
 {% endblock %}
@@ -54,6 +65,15 @@
   {% if user.is_authenticated %}
   // Annotation //
   userAnnotationInit({{ user.id }}, {{ lesson }}, {{ unit }}, '{{ user.first_name }}', {{ classID }}, {{ groupID }}, {{ group }});
+    {% if mygroup %}
+      $('#mygroup-list button').on('click', function(e) {
+        var item = e.target;
+        $('#classID').val($(item).data('classid'));
+        $('#groupID').val($(item).data('groupid'));
+        $('#group').val($(item).data('group'));
+        $('#groupFilter').submit();
+      });
+    {% endif %}
     {% if classgroup %}
       function _addButton(container, index) {
         var btn = document.createElement('button');

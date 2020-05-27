@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.http.response import HttpResponse, HttpResponseRedirectBase, HttpResponseNotFound
+from django.http.response import HttpResponse, HttpResponseRedirectBase, HttpResponseNotFound, HttpResponseNotAllowed
 from django.utils import timezone
 from django.contrib.auth.models import User
 from .models import Annotation
 from django.urls import reverse
 from django.db.models import Subquery, OuterRef
 from student.models import Enroll, StudentGroup
+from teacher.models import Classroom
 import json
 
 # Create your views here.
@@ -68,32 +69,39 @@ def get_annotation(req, aid):
     return response
 
 def search(req):
-    classid = req.GET.get('classID', default=0)
-    groupid = req.GET.get('groupID', default=0)
-    group = req.GET.get('group', default=0)
-    userid = req.GET.get('userid', default=0)
-    lesson = req.GET.get('lesson', default=0)
-    unit = req.GET.get('unit', default=0)
-    qs = Annotation.objects.filter(lesson=lesson, unit=unit).annotate(
-        firstname = Subquery(
-            User.objects.filter(id=OuterRef('user_id')).values('first_name')[:1]
-        )
-    )
-    if classid == 0:
-        if userid == 0:
-            pass
-        else:
-            qs = qs.filter(user__id=userid)
-    else:
+    classid = int(req.GET.get('classID', default=0))            # 班級
+    groupid = int(req.GET.get('groupID', default=0))            # 分組設定
+    group   = int(req.GET.get('group', default=0))              # 組別
+    userid  = int(req.GET.get('userid', default=req.user.id))   # 只取個人
+    lesson  = int(req.GET.get('lesson', default=0))             # 課程
+    unit    = int(req.GET.get('unit', default=0))               # 單元
+
+    if classid == 0:    # 個人
+        stuids = [userid]
+    else:               # 同組成員或教師查看班上分組
         stuids = []
-        if groupid == "0" or group == "0":
-            stuids = Enroll.objects.filter(classroom_id=classid).values_list('student_id', flat=True)
-        else:
-            stuids = StudentGroup.objects.filter(group_id=groupid, group=group).values_list('enroll_id', flat=True)
-        qs = qs.filter(user_id__in=stuids)
-    # return HttpResponse(str(qs.query))
-    #annotations = [a for a in qs.order_by('id')]
-    annotations = qs.order_by('id')
+        # 該班教師或在指定組別裡的成員才可以查看該分組所有人的標註資料
+        if Classroom.objects.filter(id=classid, teacher_id=req.user.id).exists() \
+            or StudentGroup.objects.filter(
+                    group_id = groupid, 
+                    group = group, 
+                    enroll_id__in = Enroll.objects.filter(student_id=req.user.id).values_list('id', flat=True)
+                ).exists():
+
+            if groupid == 0 or group == 0:
+                stuids = Enroll.objects.filter(classroom_id=classid).values_list('student_id', flat=True)
+            else:
+                stuids = StudentGroup.objects.filter(group_id=groupid, group=group).annotate(
+                    stuid = Subquery(
+                        Enroll.objects.filter(id=OuterRef('enroll_id')).values('student_id')
+                    )
+                ).values_list('stuid', flat=True)
+
+    annotations = Annotation.objects.filter(lesson=lesson, unit=unit, user_id__in=stuids).annotate(
+                      firstname = Subquery(
+                          User.objects.filter(id=OuterRef('user_id')).values('first_name')[:1]
+                      )
+                  ).order_by('id')
     total = len(annotations)
     rows = []
     for annotation in annotations:
@@ -105,6 +113,7 @@ def search(req):
         if 'shapes' in content:
             content['ranges'] = [{'start': '', 'end': '', 'startOffset': 0, 'endOffset': 0}]
         rows.append(content)
+
     data = {
         "total": total, 
         "rows": rows,

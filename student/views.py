@@ -70,16 +70,18 @@ def is_classmate(user, classroom_id):
     #     return True
     # else:
     #     return False		
-    stuids = Enroll.objects.filter(classroom_id=classroom_id).values_list('student_id', flat=True)
+    # stuids = Enroll.objects.filter(classroom_id=classroom_id).exists()
     classroom = Classroom.objects.get(id=classroom_id)
+    # if not classroom.online:
+    #     return False
     
-    if not classroom.online:
-        return False
-    
-    if user.id in stuids:
-        return True
-    else :
-        return False
+    # if user.id in stuids:
+    #     return True
+    # else :
+    #     return False
+
+    return classroom.online \
+        and Enroll.objects.filter(classroom_id=classroom_id, student_id=user.id).exists()
 
 class ClassmateRequiredMixin(object):
     def dispatch(self, request, *args, **kwargs):
@@ -113,7 +115,6 @@ class ClassroomList(LoginRequiredMixin,generic.ListView):
         classroom_ids = map(lambda a: a.classroom_id, enroll_pool)
         classrooms = Classroom.objects.filter(id__in=classroom_ids).order_by("-id")
         return classrooms
-        		
 
 class ClassroomJoinList(LoginRequiredMixin,generic.ListView):
     model = Classroom
@@ -238,19 +239,34 @@ def lesson(request, lesson, unit):
     page = "student/lesson/C{:02d}.html".format(unit)
     exercises = lesson_list[lesson-1][1][unit-1][1]
 
+    # 教師授課班級作業分組
     classes = Classroom.objects.filter(teacher_id=request.user.id)
     sq = ClassroomGroup.objects.filter(id=OuterRef('group_id'))
-    classgroup = WorkGroup.objects.filter(classroom_id__in=classes.values_list('id', flat=True), index=0).annotate(
+    classgroup = WorkGroup.objects.filter(classroom_id__in=classes.values_list('id', flat=True), index=unit-1).annotate(
         title = Subquery(sq.values('title')[:1]), 
         count = Subquery(sq.values('numbers')[:1]),
         classname = Subquery(classes.filter(id=OuterRef('classroom_id')).values('name')),
     ).values()
 
-    classid = request.POST.get('classID', default=0)
-    groupid = request.POST.get('groupID', default=0)
-    group = request.POST.get('group', default=0)
+    # 學生參與課程作業分組
+    classes = Classroom.objects.filter(
+        id__in = Enroll.objects.filter(student_id=request.user.id).values_list('classroom_id', flat=True)
+    )
+    mygroup = WorkGroup.objects.filter(classroom_id__in=classes.values_list('id', flat=True), index=unit-1).annotate(
+        classname = Subquery(classes.filter(id=OuterRef('classroom_id')).values('name')),
+        group = Subquery(
+            StudentGroup.objects.filter(
+                group_id = OuterRef('group_id'), 
+                enroll_id__in = Enroll.objects.filter(student_id=request.user.id),
+            ).values('group'),
+        ),
+    ).values()
 
-    return render(request, 'student/lesson.html', {'exercises': exercises, 'unit':unit, 'lesson':lesson, 'page':page, 'classgroup': classgroup, 'classID': classid, 'groupID': groupid, 'group': group})
+    classid = int(request.POST.get('classID', default=0))
+    groupid = int(request.POST.get('groupID', default=0))
+    group   = int(request.POST.get('group', default=0))
+
+    return render(request, 'student/lesson.html', {'exercises': exercises, 'unit':unit, 'lesson':lesson, 'page':page, 'classgroup': classgroup, 'mygroup': mygroup, 'classID': classid, 'groupID': groupid, 'group': group})
 
 def submit(request, typing, lesson, index):
     work_dict = {}
