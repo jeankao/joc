@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="workcard" class="card">
+  <div class="card-header d-flex" style="justify-content: space-between;">
+    <div>{{ work.username }}: {{ work.get_helps_display }}</div>
+    <div>{{ work.publication_date }}</div>
+  </div>
+  <div class="card-body">
+    <pre><code class="python">{{ object.code|safe }}</code></pre>
+    <img src="/{{ work.picture }}">
+  </div>
+  <div class="card-footer">
+    <form action="" method="post">
+      {% csrf_token %}
+      {{ form }}
+      <input type="submit" value="送出">
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block header %}
+<link rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+{% endblock %}
+
+{% block footer_script %}
+hljs.initHighlightingOnLoad();
+{% endblock %}

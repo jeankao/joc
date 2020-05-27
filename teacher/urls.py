@@ -76,7 +76,9 @@ urlpatterns = [
     path('work/assistant/make/', views.steacher_make),
 	#評分
     path('score_peer/<int:typing>/<int:index>/<int:classroom_id>/<int:group>/', views.score_peer),
-    path('scoring/<int:typing>/<int:classroom_id>/<int:user_id>/<int:index>/', views.scoring),
+    # path('scoring/<int:typing>/<int:classroom_id>/<int:user_id>/<int:index>/', views.scoring),
+    path('scoring/<int:typing>/<int:classroom_id>/<int:user_id>/<int:index>/', views.Scoring.as_view()),
+
 	#心得
 	path('memo/<int:classroom_id>/', views.memo),
     path('check/<int:typing>/<int:unit>/<int:user_id>/<int:classroom_id>/', views.check),

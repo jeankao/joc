@@ -82,22 +82,22 @@ class Work(models.Model):
     lesson = models.IntegerField(default=0)
     typing = models.IntegerField(default=0)
     index = models.IntegerField()
-    memo = models.TextField()
+    memo = models.TextField('心得感想')
     memo_c = models.IntegerField(default=0)
     memo_e = models.IntegerField(default=0)    
     publish = models.BooleanField(default=False)        
     publication_date = models.DateTimeField(default=timezone.now)
-    score = models.IntegerField(default=-2)
-    scorer = models.IntegerField(default=0)
+    score = models.IntegerField('成績', default=-2)
+    scorer = models.IntegerField('評分人id', default=0)
 	# scratch, microbit
     file = models.FileField()
     #　python
-    picture = models.ImageField(upload_to = upload_path_handler, default = '/static/python/null.jpg')
-    code = models.TextField(default='')
-    helps = models.IntegerField(default=0, choices=HELP_CHOICES)
+    picture = models.ImageField('執行結果', upload_to = upload_path_handler, default = '/static/python/null.jpg')
+    code = models.TextField('程式碼', default='')
+    helps = models.IntegerField('創作過程', default=0, choices=HELP_CHOICES)
     answer = models.BooleanField(default=False)
     youtube = models.TextField(default='')
-    comment = models.TextField(default='')
+    comment = models.TextField('評語回饋', default='')
 
     def __unicode__(self):
         user = User.objects.filter(id=self.user_id)[0]

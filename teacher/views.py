@@ -31,6 +31,7 @@ from django.conf import settings
 from wsgiref.util import FileWrapper
 import re
 from io import BytesIO
+from django.db.models import Subquery, OuterRef
 
 def filename_browser(request, filename):
 	browser = request.META['HTTP_USER_AGENT'].lower()
@@ -1269,10 +1270,41 @@ def work_group(request, typing, classroom_id, index):
       
     classmate_work = sorted(classmate_work, key=getKey)    
     return render(request, 'teacher/work_group.html',{'test': group_id, 'typing':typing, 'classmate_work': classmate_work, 'classroom':classroom, 'index': index, 'lesson':lesson})
-  
-  
+
+class Scoring(UpdateView):
+    model = Work
+    fields = ['score', 'comment']
+    template_name = 'teacher/work_form.html'
+
+    def get_object(self):
+        classroom = Classroom.objects.get(id = self.kwargs['classroom_id'])
+        userid = self.kwargs['user_id']
+        index = self.kwargs['index']
+        typing = self.kwargs['typing']
+        return Work.objects.filter(typing=typing, user_id=userid, index=index, lesson=classroom.lesson).annotate(
+            username = Subquery(
+                User.objects.filter(id=userid).values('first_name')
+            )
+        ).order_by('-id')[0]
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['test'] = 'Hello'
+        return ctx
+
+    def get_success_url(self):
+        classid = self.kwargs['classroom_id']
+        index = self.kwargs['index']
+        typing = self.kwargs['typing']
+        return f"/teacher/work/class/{typing}/{classid}/{index}/"
+    
+    def form_valid(self, form):
+        form.instance.scorer = self.request.user.id
+        return super().form_valid(form)
+
 # (小)教師評分
 def scoring(request, classroom_id, user_id, index, typing):
+    print(classroom_id, user_id, index, typing)
     user = User.objects.get(id=request.user.id)
     classroom = Classroom.objects.get(id=classroom_id)
     lesson = classroom.lesson
@@ -1294,7 +1326,8 @@ def scoring(request, classroom_id, user_id, index, typing):
         for unit1 in lesson_list[int(lesson)-1][1]:
             for assignment in unit1[1]:
                 lesson_dict[assignment[2]] = assignment[0]
-        lesson_name = lesson_dict[int(index)]
+        # lesson_name = lesson_dict[int(index)]
+        lesson_name = lesson_list[int(lesson)-1][1][0]
     elif typing == 1:
         lesson_name = TWork.objects.get(id=index).title
     user = User.objects.get(id=user_id)

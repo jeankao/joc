@@ -19,6 +19,7 @@
 {% endblock %}
 
 {% block content %}
+  {{ request.method }}
   {% if lesson == 1 %}
     <div class="annotate">
     {% include page %}
@@ -114,5 +115,9 @@ $('a.unexpand').click(function(e){
   $("#div"+$(launcher).data('contentid')).hide();
   $("#memo"+$(launcher).data('contentid')).hide();          
   $("#expand"+$(launcher).data('contentid')).show();          
-});   
+});
+
+  {% if request.method == "POST" %}
+    $("a.expand").trigger('click');
+  {% endif %}
 {% endblock %}
