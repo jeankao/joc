@@ -359,7 +359,7 @@ def work(request, typing, classroom_id):
     classroom = Classroom.objects.get(id=classroom_id)
     lesson = classroom.lesson
     lesson_dict = OrderedDict()
-    works = Work.objects.filter(typing=typing, user_id=request.user.id, lesson=classroom.lesson).order_by("id")
+    works = Work.objects.filter(typing=typing, user_id=request.user.id, lesson=classroom.lesson).order_by("-id")
     group_ids = [group.group_id for group in WorkGroup.objects.filter(typing=typing, classroom_id=classroom_id)] 
     assistant_pool = [assistant for assistant in WorkAssistant.objects.filter(typing=typing, lesson=lesson, classroom_id=classroom_id)]				
 	
