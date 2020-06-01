@@ -69,3 +69,4 @@ a{outline:none; text-decoration:none;}
 
 #workcard .card-body img {max-width: 100%; box-shadow: 1px 1px 3px #666}
 #workcard .card-body img:hover {max-width: unset}
+#workcard .card-header .score {color: red; font-size: 200%; border-bottom: 5px double red}

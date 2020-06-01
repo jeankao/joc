@@ -268,6 +268,24 @@ def lesson(request, lesson, unit):
 
     return render(request, 'student/lesson.html', {'exercises': exercises, 'unit':unit, 'lesson':lesson, 'page':page, 'classgroup': classgroup, 'mygroup': mygroup, 'classID': classid, 'groupID': groupid, 'group': group})
 
+class WorkEdit(UpdateView):
+    model = Work
+    fields = ['memo', 'helps', 'code']
+
+    def get_object(self):
+        works = Work.objects.filter(
+            typing = self.kwargs['typing'], 
+            lesson = self.kwargs['lesson'],
+            index = self.kwargs['index'],
+            user_id = self.request.user.id,
+        ).order_by('-id')
+        if len(works) > 0:
+            return works[0]
+        return Work()
+
+    def get_success_url(self):
+        return ""
+
 def submit(request, typing, lesson, index):
     work_dict = {}
     form = None

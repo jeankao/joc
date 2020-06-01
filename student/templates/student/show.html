@@ -4,33 +4,38 @@
 {% block content %}
 {% if lesson == 1 or lesson == 2 %}
   {% if work %}
-<script type="text/javascript" src="/static/sb2/swfobject.js"></script>
- 
-<script type="text/javascript">   
-var flashvars = {
-project: "/static/work/{{request.user.id}}/{{work_dict|hash_file:index}}" ,
-autostart: "false"
-};
-var params = {
-bgcolor: "#FFFFFF",
-allowScriptAccess: "always",
-allowFullScreen: "true",
-wmode: "window",
-menu:"‘false"
-};
-var attributes = {};
-swfobject.embedSWF("/static/sb2/Scratch.swf", "flashContent", "482", "387", "10.2.0","expressInstall.swf", flashvars, params, attributes);
-</script>
-    {% if work.scorer > 0 %}<div>評分者：{{ work.scorer|nickname}}</div>{% endif %}
-    {% if work.score > 0 %}<div>分數：{{ work.score}}</div>{% endif %}
-    {% if work.comment %}<div>評語：{{ work.comment }}</div>{% endif %}	
-    <div>心得感想：</div>
-    <div>{{ work.memo }}</div>
-    <div>程式：</div>
-    <div id="flashContent" >
-    </div>  
+  <div id="workcard" class="card">
+    <div class="card-header">
+      <div class="d-flex" style="justify-content: space-between">
+        {% if work.scorer > 0 %}<div>評分者：{{ work.scorer|nickname}}</div>{% endif %}
+        {% if work.score > 0 %}<div class="score">{{ work.score}}</div>{% endif %}
+      </div>
+      {% if work.comment %}
+      <div class="row d-flex"><hr class="col"/><div class="col-auto">評語</div><hr class="col"/></div>
+      <div>{{ work.comment|linebreaks }}</div>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      <div class="row d-flex"><hr class="col"/><div class="col-auto">心得感想</div><hr class="col"/></div>
+      <div>{{ work.memo|linebreaks }}</div>
+      <div class="row d-flex"><hr class="col"/><div class="col-auto">程式碼</div><hr class="col"/></div>
+      <pre><code class="python">{{ work.code|safe }}</code></pre>
+      <div class="row d-flex"><hr class="col"/><div class="col-auto">執行結果</div><hr class="col"/></div>
+      <img src="/{{ work.picture }}">
+    </div>
+  </div>
   {% else %}
     尚未繳交
   {% endif %}
 {% endif %}
+{% endblock %}
+
+{% block header %}
+<link rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+{% endblock %}
+
+{% block footer_script %}
+hljs.initHighlightingOnLoad();
 {% endblock %}

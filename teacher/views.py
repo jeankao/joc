@@ -32,6 +32,7 @@ from wsgiref.util import FileWrapper
 import re
 from io import BytesIO
 from django.db.models import Subquery, OuterRef
+from django import forms
 
 def filename_browser(request, filename):
 	browser = request.META['HTTP_USER_AGENT'].lower()
@@ -1271,6 +1272,7 @@ def work_group(request, typing, classroom_id, index):
     classmate_work = sorted(classmate_work, key=getKey)    
     return render(request, 'teacher/work_group.html',{'test': group_id, 'typing':typing, 'classmate_work': classmate_work, 'classroom':classroom, 'index': index, 'lesson':lesson})
 
+# 教師評分
 class Scoring(UpdateView):
     model = Work
     fields = ['score', 'comment']
@@ -1287,11 +1289,24 @@ class Scoring(UpdateView):
             )
         ).order_by('-id')[0]
     
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['test'] = 'Hello'
-        return ctx
-
+    def get_form(self):
+        form = super().get_form()
+        form.fields['comment'].required = False     # 評語改為非必填
+        # 分數改為下拉選單
+        form.fields['score'] = forms.ChoiceField(
+            label = form.fields['score'].label, 
+            choices = [
+                (-2, ""), 
+                (100, "100分"), 
+                (90, "90分"), 
+                (80, "80分"), 
+                (70, "70分"), 
+                (60, "60分"), 
+                (-1, "重交"),
+            ],
+        )
+        return form
+    
     def get_success_url(self):
         classid = self.kwargs['classroom_id']
         index = self.kwargs['index']

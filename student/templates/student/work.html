@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load tag %}
 {% block content %}
-    <table class="table">
+<table class="table">
     <tr>
         <td>編號</td>      
         <td>主題</td>
@@ -14,21 +14,31 @@
 
     </tr>
     {% for key, assignment in lesson_dict %}
-        <tr align=left>
-        <td align=right>{{forloop.counter}}</td>          
-            <td>{{assignment.0}}</td>
-			<td>{% if assignment.2.score > 0 %}<a href="/student/work/show/{{typing}}/{{classroom.lesson}}/{{key}}/{{request.user.id}}">已評分</a>{% else %}<a href="/student/work/submit/{{typing}}/{{classroom.lesson}}/{{key}}">繳交</a>{% endif %}</td>
-            <td>{% if assignment.2 %}{% if assignment.2.scorer == 0  %}尚未評分{% else %}{{assignment.2.scorer|nickname}}{% endif %}{% endif %}</td>
-            {% if assignment.2.score < 0 %}
-                <td>已繳交</td>
-            {% else %}
-                <td>{{assignment.2.score}}</td>
-            {% endif %}
-            <td>{{assignment.2.publication_date|date:"Y/m/d h:i" }}</td>
-            <td>{% if assignment.4 > 0 %}{{assignment.4|nickname}}{% endif %}</td> 	
-            <td><A href="/student/memo/{{typing}}/{{classroom.id}}/{{key}}">心得</a> [<a href="/student/memo/count/{{typing}}/{{classroom.id}}/{{key}}">統計]</A></td>
-            
-        </tr>
+    <tr>
+        <td style="text-align: right">{{forloop.counter}}</td>          
+        <td>{{assignment.0}}</td>
+        <td>{% if assignment.2.score > 0 %}<a href="/student/work/show/{{typing}}/{{classroom.lesson}}/{{key}}/{{request.user.id}}">已評分</a>{% else %}<a href="/student/work/submit/{{typing}}/{{classroom.lesson}}/{{key}}">繳交</a>{% endif %}</td>
+        <td>{% if assignment.2 %}{% if assignment.2.scorer == 0  %}尚未評分{% else %}{{assignment.2.scorer|nickname}}{% endif %}{% endif %}</td>
+        <td>
+            {% if assignment.2.score > 0 %}
+                {{ assignment.2.score }}
+            {% elif assignment.2.score == -1 %}
+                重交
+            {% elif assignment.2.score == -2 %}
+                已繳交
+            {% endif %}            
+        </td>
+        <!--
+        {% if assignment.2.score < 0 %}
+            <td>已繳交</td>
+        {% else %}
+            <td>{{assignment.2.score}}</td>
+        {% endif %}
+        -->
+        <td>{{assignment.2.publication_date|date:"Y/m/d h:i" }}</td>
+        <td>{% if assignment.4 > 0 %}{{assignment.4|nickname}}{% endif %}</td> 	
+        <td><A href="/student/memo/{{typing}}/{{classroom.id}}/{{key}}">心得</a> [<a href="/student/memo/count/{{typing}}/{{classroom.id}}/{{key}}">統計]</A></td>
+    </tr>
     {% endfor %}
-    </table>
+</table>
 {% endblock %}
