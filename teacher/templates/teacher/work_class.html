@@ -27,10 +27,10 @@
       {% endif %}
     </td>
     <td>
-      {% if list.4 >= 0 and list.4 < classroom.group_number %}
-        第 {{ list.4|add:1 }} 組
-      {% else %}
+      {% if list.4 == -1 or list.4 >= classroom.group_number %}
         尚未分組
+      {% else %}
+        第 {{ list.4|add:1 }} 組
       {% endif %}      
     </td>
     <td>

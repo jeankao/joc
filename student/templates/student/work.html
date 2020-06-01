@@ -28,13 +28,6 @@
                 已繳交
             {% endif %}            
         </td>
-        <!--
-        {% if assignment.2.score < 0 %}
-            <td>已繳交</td>
-        {% else %}
-            <td>{{assignment.2.score}}</td>
-        {% endif %}
-        -->
         <td>{{assignment.2.publication_date|date:"Y/m/d h:i" }}</td>
         <td>{% if assignment.4 > 0 %}{{assignment.4|nickname}}{% endif %}</td> 	
         <td><A href="/student/memo/{{typing}}/{{classroom.id}}/{{key}}">心得</a> [<a href="/student/memo/count/{{typing}}/{{classroom.id}}/{{key}}">統計]</A></td>
