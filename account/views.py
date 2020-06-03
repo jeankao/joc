@@ -403,7 +403,7 @@ class LineReplyView(CreateView):
     model = Message
     context_object_name = 'messages'    
     form_class = LineForm
-    template_name = 'account/line_form_reply.html'     
+    template_name = 'account/line_form.html'     
 
     def form_valid(self, form):
         self.object = form.save(commit=False)

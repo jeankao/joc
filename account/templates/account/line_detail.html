@@ -2,46 +2,70 @@
 {% load tag %}
 {% block content %}
 {% if canread %}
-{% if message.type == 2 %}
-        <h3>私訊來源：{{message.author_id|nickname}}</h3>
-        <h3>私訊對象：{{messagepoll.reader_id|nickname}}{% if messagepoll.read %}(已讀){% else %}(未讀){% endif %}</h3>
-{% endif %} 
-<table class="table">
-            <tr>
-                <td>時間</td><td>{{message.time| date:"Y/m/d H:i"}}</td>
-            </tr>
-            <tr>
-                <td>主旨</td> <td>{{message.title}}</td>
-            </tr>
-            <tr>
-                <td>內容</td><td>{% if message.content %}{{message.content|safe}}{% else %}無{% endif %}</td>
-            </tr>
-           
-        </table>
-		      {% for file in files %}
-		  <BR><button class="btn btn-info">
-              {{forloop.revcounter}}
-        </button> 
-		          {{file.publication_date}}	
-			        {% if file.title|is_pic %}
-		<a href="/account/line/showpic/{{file.id}}" target="_blank">{{file.title}}</a>
-			        {% else %}
-			<a href="/account/line/download/{{file.id}}" target="_blank">{{file.title}}</a>
-			        {% endif %}
-		      {% endfor %}
-
-{% if not request.user.id == message.author_id %}
-<h3><a href="/account/line/reply/{{message.classroom_id|abs_filter}}/{{message.author_id}}/{{message.id}}">回覆訊息</a></h3>
-{% endif %}
-{% if lists and message.type == 2 %}
-        <h3>歷史私訊</h3>
-        <table class="table">
-        {% for list in lists %}
-        <tr><td>{{list.time}}<a href="/account/line/detail/{{list.classroom_id|abs_filter}}/{{list.id}}">{{list.title}}</a></td></tr>
-        {% empty %}
-        <tr><td>無</td></tr>
-        {% endfor %}
-        </table>
-{% endif %}
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex" style="justify-content: space-between">
+                <h3 class="message-title">{{ message.title }}</h3>
+                {% if not request.user.id == message.author_id %}
+                <div>
+                <a class="btn btn-sm btn-primary" href="/account/line/reply/{{message.classroom_id|abs_filter}}/{{message.author_id}}/{{message.id}}">
+                    <i class="fas fa-reply"></i> 回覆訊息
+                </a>
+                </div>
+                {% endif %}
+            </div>
+            {% if message.type == 2 %}
+            <div class="d-flex" style="justify-content: space-between">
+                <div><i class="fas fa-clock"></i> {{message.time| date:"Y/m/d H:i"}}</div>
+                <div class="d-flex">
+                    <div>{{message.author_id|nickname}}</div>
+                    <div><i class="fas fa-arrow-alt-circle-right"></i></div>
+                    <div>
+                        {{messagepoll.reader_id|nickname}}
+                        {% if messagepoll.read %}(已讀){% else %}(未讀){% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if message.content %}
+                {{ message.content|safe }}
+            {% else %}
+                無
+            {% endif %}
+        </div>
+        {% if files %}
+        <div class="card-footer">
+            {% for file in files %}
+            <div class="list-group-item">
+                <span class="badge badge-primary">{{ forloop.revcounter }}</span>
+                {% if file.title|is_pic %}
+                    <a href="/account/line/showpic/{{file.id}}" target="_blank">{{file.title}}</a>
+                {% else %}
+                    <a href="/account/line/download/{{file.id}}" target="_blank">{{file.title}}</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% if lists and message.type == 2 %}
+    <hr>
+    <div class="card">
+        <div class="card-header">
+            <h3>歷史私訊</h3>
+        </div>
+        <ul class="list-group">
+            {% for list in lists %}
+            <li class="list-group-item">
+                {{list.time}}<a href="/account/line/detail/{{list.classroom_id|abs_filter}}/{{list.id}}">{{list.title}}</a>
+            </li>
+            {% empty %}
+            <li class="list-group-item">無</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 {% endif %}
 {% endblock %}

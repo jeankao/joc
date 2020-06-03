@@ -16,10 +16,10 @@ class Enroll(models.Model):
     # 電腦
     computer = models.IntegerField("電腦", default=0)   
     # 組別
-    group = models.IntegerField(default=-1)
+    group = models.IntegerField("組別", default=-1)
     # 心得
-    score_memo = models.IntegerField(default=0)    
-        
+    score_memo = models.IntegerField("指定作業心得成績", default=0)
+    score_memo2 = models.IntegerField("自訂作業心得成績", default=0)
     
     @property
     def classroom(self):
