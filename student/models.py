@@ -14,34 +14,34 @@ class Enroll(models.Model):
     # 座號
     seat = models.IntegerField("座號", default=0)
     # 電腦
-    computer = models.IntegerField("電腦", default=0)   
+    computer = models.IntegerField("電腦", default=0)
     # 組別
     group = models.IntegerField("組別", default=-1)
     # 心得
     score_memo = models.IntegerField("指定作業心得成績", default=0)
     score_memo2 = models.IntegerField("自訂作業心得成績", default=0)
-    
+
     @property
     def classroom(self):
         return Classroom.objects.get(id=self.classroom_id)
 
     @property
     def student(self):
-        return User.objects.get(id=self.student_id)      
+        return User.objects.get(id=self.student_id)
 
     def __str__(self):
         return str(self.id) + ":" + str(self.classroom_id) + ":" + str(self.student_id)
-        
+
     def set_foo(self, x):
         self.groupshow = json.dumps(x)
 
     def get_groupshow(self):
-        return json.loads(self.groupshow)     
+        return json.loads(self.groupshow)
 
     class Meta:
-        unique_together = ('classroom_id', 'student_id')	
+        unique_together = ('classroom_id', 'student_id')
 
-		
+
 # 小老師
 class WorkAssistant(models.Model):
     student_id = models.IntegerField(default=0)
@@ -49,7 +49,7 @@ class WorkAssistant(models.Model):
     group = models.IntegerField(default=0)
     index = models.IntegerField(default=0)
     lesson = models.IntegerField(default=0)
-    classroom_id = models.IntegerField(default=0)    
+    classroom_id = models.IntegerField(default=0)
 
     @property
     def student(self):
@@ -62,7 +62,7 @@ class WorkGroup(models.Model):
     group_id = models.IntegerField(default=0)
 
     class Meta:
-        unique_together = ('classroom_id', 'index', 'typing')	
+        unique_together = ('classroom_id', 'index', 'typing')
 
 def upload_path_handler(instance, filename):
     return "static/certificate/0/{filename}".format(filename=instance.id+".jpg")
@@ -84,8 +84,8 @@ class Work(models.Model):
     index = models.IntegerField()
     memo = models.TextField('心得感想')
     memo_c = models.IntegerField(default=0)
-    memo_e = models.IntegerField(default=0)    
-    publish = models.BooleanField(default=False)        
+    memo_e = models.IntegerField(default=0)
+    publish = models.BooleanField(default=False)
     publication_date = models.DateTimeField(default=timezone.now)
     score = models.IntegerField('成績', default=-2)
     scorer = models.IntegerField('評分人id', default=0)
@@ -123,26 +123,26 @@ class Answer(models.Model):
 class WorkFile(models.Model):
     work_id = models.IntegerField(default=0)
     filename = models.TextField()
-    upload_date = models.DateTimeField(default=timezone.now)		
-	
+    upload_date = models.DateTimeField(default=timezone.now)
+
 #討論區作業
 class SFWork(models.Model):
     student_id = models.IntegerField(default=0)
     index = models.IntegerField(default=0)
     memo = models.TextField(default='')
     memo_e =  models.IntegerField(default=0)
-    memo_c = models.IntegerField(default=0)		
+    memo_c = models.IntegerField(default=0)
     publish = models.BooleanField(default=False)
     publication_date = models.DateTimeField(default=timezone.now)
     reply_date = models.DateTimeField(default=timezone.now)
     score = models.IntegerField(default=0)
     scorer = models.IntegerField(default=0)
     comment = models.TextField(default='',null=True,blank=True)
-    comment_publication_date = models.DateTimeField(default=timezone.now)		
+    comment_publication_date = models.DateTimeField(default=timezone.now)
     likes = models.TextField(default='')
-    like_count = models.IntegerField(default=0)	
+    like_count = models.IntegerField(default=0)
     reply = models.IntegerField(default=0)
-		
+
     def __unicode__(self):
         user = User.objects.filter(id=self.student_id)[0]
         index = self.index
@@ -153,9 +153,9 @@ class SFContent(models.Model):
     student_id = models.IntegerField(default=0)
     work_id = models.IntegerField(default=0)
     title =  models.CharField(max_length=250,null=True,blank=True)
-    filename = models.CharField(max_length=60,null=True,blank=True)    
+    filename = models.CharField(max_length=60,null=True,blank=True)
     publication_date = models.DateTimeField(default=timezone.now)
-    delete_date = models.DateTimeField(default=timezone.now)		
+    delete_date = models.DateTimeField(default=timezone.now)
     visible = models.BooleanField(default=True)
 
 #討論留言
@@ -164,25 +164,25 @@ class SFReply(models.Model):
     work_id =  models.IntegerField(default=0)
     user_id = models.IntegerField(default=0)
     memo =  models.TextField(default='')
-    publication_date = models.DateTimeField(default=timezone.now)        
-	
-	
+    publication_date = models.DateTimeField(default=timezone.now)
+
+
 
 class StudentGroup(models.Model):
     group_id = models.IntegerField(default=0)
     enroll_id = models.IntegerField(default=0)
-    group = models.IntegerField(default=0)		
+    group = models.IntegerField(default=0)
 
     class Meta:
-        unique_together = ('enroll_id', 'group_id',)		
+        unique_together = ('enroll_id', 'group_id',)
 
 class StudentGroupLeader(models.Model):
     group_id = models.IntegerField(default=0)
-    group = models.IntegerField(default=0)	
-    enroll_id = models.IntegerField(default=0)	
+    group = models.IntegerField(default=0)
+    enroll_id = models.IntegerField(default=0)
 
     class Meta:
-        unique_together = ('group_id', 'group')		
+        unique_together = ('group_id', 'group')
 
 
 #思辨文章
@@ -196,11 +196,11 @@ class SSpeculationWork(models.Model):
     score = models.IntegerField(default=0)
     scorer = models.IntegerField(default=0)
     comment = models.TextField(default='',null=True,blank=True)
-    comment_publication_date = models.DateTimeField(default=timezone.now)	
+    comment_publication_date = models.DateTimeField(default=timezone.now)
     likes = models.TextField(default='')
-    like_count = models.IntegerField(default=0)	
+    like_count = models.IntegerField(default=0)
     reply = models.IntegerField(default=0)
-		
+
     def __unicode__(self):
         user = User.objects.filter(id=self.student_id)[0]
         index = self.index
@@ -211,27 +211,27 @@ class SSpeculationContent(models.Model):
     student_id = models.IntegerField(default=0)
     work_id = models.IntegerField(default=0)
     title =  models.CharField(max_length=250,null=True,blank=True)
-    filename = models.CharField(max_length=60,null=True,blank=True)    
+    filename = models.CharField(max_length=60,null=True,blank=True)
     publication_date = models.DateTimeField(default=timezone.now)
-    delete_date = models.DateTimeField(default=timezone.now)		
+    delete_date = models.DateTimeField(default=timezone.now)
     visible = models.BooleanField(default=True)
-	        		
+
 
 #測驗
 class ExamWork(models.Model):
     student_id = models.IntegerField(default=0)
-    exam_id = models.IntegerField()    
+    exam_id = models.IntegerField()
     questions = models.TextField(default='')
     publish = models.BooleanField(default=False)
     publication_date = models.DateTimeField(default=timezone.now)
     score = models.IntegerField(default=0)
     scorer = models.IntegerField(default=0)
-		
+
     def __unicode__(self):
         user = User.objects.filter(id=self.student_id)[0]
         exam_id = self.exam_id
-        return user.first_name+"("+str(exam_id)+")"		
-			
+        return user.first_name+"("+str(exam_id)+")"
+
 #測驗答案
 class ExamAnswer(models.Model):
     examwork_id = models.IntegerField(default=0)
@@ -239,13 +239,13 @@ class ExamAnswer(models.Model):
     student_id = models.IntegerField(default=0)
     answer = models.TextField(default='')
     answer_right = models.BooleanField(default=False)
-		
+
     class Meta:
-        unique_together = ('student_id', 'examwork_id', 'question_id')		
-		
+        unique_together = ('student_id', 'examwork_id', 'question_id')
+
 class TeamContent(models.Model):
     team_id =  models.IntegerField(default=0)
-    user_id = models.IntegerField(default=0)  
+    user_id = models.IntegerField(default=0)
     types = models.IntegerField(default=0)
     title = models.CharField(max_length=250,null=True,blank=True)
     memo = models.TextField(default='')
@@ -254,19 +254,19 @@ class TeamContent(models.Model):
     youtube_length = models.IntegerField(default=0)
     file = models.FileField(blank=True,null=True)
     filename = models.CharField(max_length=60,null=True,blank=True)
-    publication_date = models.DateTimeField(default=timezone.now)    
+    publication_date = models.DateTimeField(default=timezone.now)
     publish = models.BooleanField(default=False)
 
 class CourseContentProgress(models.Model):
-    student_id = models.IntegerField(default=0)  
-    content_id = models.IntegerField(default=0)  
-    progress =models.IntegerField(default=0)  
-    start_time = models.DateTimeField(default=timezone.now)    
+    student_id = models.IntegerField(default=0)
+    content_id = models.IntegerField(default=0)
+    progress =models.IntegerField(default=0)
+    start_time = models.DateTimeField(default=timezone.now)
     finish_time = models.DateTimeField(default=timezone.now)
 
     class Meta:
-        unique_together = ('student_id', 'content_id')		    
-      
+        unique_together = ('student_id', 'content_id')
+
 # 測驗
 class ScratchExam(models.Model):
     exam_id = models.IntegerField()

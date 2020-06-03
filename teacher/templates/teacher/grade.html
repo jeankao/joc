@@ -26,13 +26,11 @@
   <td style="padding:2px">姓名</td>
   <td align="center" style="padding:0px">成績</td>   
     <td align="center" style="padding:0px"><button type="button" class="btn btn-warning btn-circle">心得</button></td>
-    <td align="center" style="padding:0px"><button type="button" class="btn btn-warning btn-circle">心得</button></td>
-    <td align="center" style="padding:0px"><button type="button" class="btn btn-warning btn-circle">心得</button></td>
   
                 {% for assignment in lesson_list %}                    
                      <td align="center" style="padding:0px"><button type="button" class="btn btn-warning btn-circle">
 					 {% if typing == 0 %}{{assignment.0}}{% else %}{{assignment.title}}{% endif %}
-					 </button
+					 </button>
 					 </td>              
                 {% endfor %}
     
@@ -42,11 +40,9 @@
   <td></td>
   <td></td>
   <td>全部</td>
-  <td>上學期</td>
-  <td>下學期</td>
   {% for assignment in lesson_list %}      
     <td align="center" style="padding:0px">  
-  {% if typing == 0 %}{{assignment.1.0}}{% else %}{{forloop.counter}}{% endif %}
+  {% if typing == 0 %}{{assignment.1}}{% else %}{{forloop.counter}}{% endif %}
    </td>
   {% endfor %}
   </tr>
@@ -56,12 +52,9 @@
   <td style="padding:2px">{{enroll.seat}}</td>
   <td style="padding:2px" nowrap>{{enroll.student.first_name}}</td>
   <td style="padding:0px" align=center><button type="button" class="btn btn-danger btn-circle">{{grade}}</button></td>
-  <td align=center style="padding:0px"><button type="button" class="btn btn-danger btn-circle">{% if memo.0 > 0 %}{{memo.0}}{% else %}?{% endif %}</button></td>
-  <td align=center style="padding:0px"><button type="button" class="btn btn-danger btn-circle">{% if memo.1 > 0 %}{{memo.1}}{% else %}?{% endif %}</button></td>
-  <td align=center style="padding:0px"><button type="button" class="btn btn-danger btn-circle">{% if memo.2 > 0 %}{{memo.2}}{% else %}?{% endif %}</button></td>
-
+  <td align=center style="padding:0px"><button type="button" class="btn btn-danger btn-circle">{% if memo > 0 %}{{memo}}{% else %}?{% endif %}</button></td>
   {% for score, index in enroll_score %}
-  <td align=center style="padding:0px"><button type="button" class="btn btn-{% if score == -1 %}success{% elif score == "X" %}dark{% else %}info{% endif %} btn-circle">{% if score == -1 %}V{% elif score == "X" %}X{% else %}{{score}}{% endif %}</button></td>
+  <td align=center style="padding:0px"><button type="button" class="btn btn-{% if score < 0 %}success{% elif score == "X" %}dark{% else %}info{% endif %} btn-circle">{% if score < 0 %}V{% elif score == "X" %}X{% else %}{{score}}{% endif %}</button></td>
   {% endfor %}
 </tr>
 {% endfor %}
