@@ -470,7 +470,7 @@ def line_download(request, file_id):
     content = MessageContent.objects.get(id=file_id)
     filename = content.title
 
-    download =  settings.BASE_DIR + "/static/upload/" + content.filename
+    download =  settings.BASE_DIR + "/static/attach/" + content.filename
     wrapper = FileWrapper(open(download,"rb"))
     response = HttpResponse(wrapper, content_type = 'application/force-download')
     browser = request.META['HTTP_USER_AGENT'].lower()

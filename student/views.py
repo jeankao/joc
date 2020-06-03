@@ -555,6 +555,7 @@ def memo_count(request, typing, classroom_id, index):
                     break
         return render(request, 'student/memo_count.html', {'typing':typing, 'words':words, 'enrolls':enrolls, 'classroom':classroom, 'index':index})
 
+from teacher.views import get_unit_list
 # 評分某同學某進度心得
 @login_required
 def memo_user(request, typing, user_id, lesson, classroom_id):
@@ -564,19 +565,18 @@ def memo_user(request, typing, user_id, lesson, classroom_id):
     works = Work.objects.filter(lesson=lesson, user_id=user_id, typing=typing)
     lesson_dict = {}
     if typing == 0:
-        for unit in lesson_list[int(lesson)-1][1]:
-            for assignment in unit[1]:
-                sworks = list(filter(lambda w: w.index==assignment[2], works))
-                if len(sworks)>0 :
-                    lesson_dict[assignment[2]] = [assignment[0], sworks[0]]
-                else :
-                    lesson_dict[assignment[2]] = [assignment[0], None]
+        for id, unit in list(enumerate(get_unit_list())):
+            sworks = list(filter(lambda w: w.index == id, works))
+            if len(sworks) > 0:
+                lesson_dict[id] = [unit, sworks[-1]]
+            else:
+                lesson_dict[id] = [unit, None]
     else :
         assignments = TWork.objects.filter(classroom_id=classroom_id)
         for assignment in assignments:
             sworks = list(filter(lambda w: w.index==assignment.id, works))
             if len(sworks)>0 :
-                lesson_dict[assignment.id] = [assignment.title, sworks[0]]
+                lesson_dict[assignment.id] = [assignment.title, sworks[-1]]
             else :
                 lesson_dict[assignment.id] = [assignment.title, None]
     return render(request, 'student/memo_user.html', {'typing':typing, 'lesson_dict':sorted(lesson_dict.items()), 'student': user})
