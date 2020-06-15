@@ -1333,6 +1333,7 @@ class Scoring(UpdateView):
         form.instance.scorer = self.request.user.id
         return super().form_valid(form)
 
+"""
 # (小)教師評分
 def scoring(request, classroom_id, user_id, index, typing):
     print(classroom_id, user_id, index, typing)
@@ -1471,6 +1472,7 @@ def scoring(request, classroom_id, user_id, index, typing):
         except ObjectDoesNotExist:
             group_id = 0
     return render(request, 'teacher/scoring.html', {'typing':typing, 'form': form,'work':work3, 'pic':pic, 'workfiles':workfiles, 'teacher':teacher, 'student':user, 'classroom_id':classroom_id, 'lesson':lesson, 'index':index, 'group_id': group_id})
+"""
 
 # 小老師評分名單
 def score_peer(request, typing, index, classroom_id, group):
@@ -1481,11 +1483,12 @@ def score_peer(request, typing, index, classroom_id, group):
     except ObjectDoesNotExist:
         group_id = 0
     if typing == 0:
-        lesson_dict = OrderedDict()
-        for unit1 in lesson_list[int(lesson)-1][1]:
-            for assignment in unit1[1]:
-                lesson_dict[assignment[2]] = assignment[0]
-        queryset = lesson_dict[int(index)]
+        # lesson_dict = OrderedDict()
+        # for unit1 in lesson_list[int(lesson)-1][1]:
+        #     for assignment in unit1[1]:
+        #         lesson_dict[assignment[2]] = assignment[0]
+        # queryset = lesson_dict[int(index)]
+        queryset = get_unit_list()[index]
     elif typing == 1:
         queryset = TWork.objects.get(id=index).title
     try:
@@ -1776,22 +1779,27 @@ def announce_detail(request, classroom_id, message_id):
 
 # Ajax 設為小教師、取消小教師
 def steacher_make(request):
-    classroom_id = request.POST.get('classroomid')
-    user_id = request.POST.get('userid')
+    classroom_id = int(request.POST.get('classroomid'))
+    user_id = int(request.POST.get('userid'))
     action = request.POST.get('action')
-    lesson = request.POST.get('lesson')
-    typing = request.POST.get('typing')
-    index = request.POST.get('index')
+    lesson = int(request.POST.get('lesson'))
+    typing = int(request.POST.get('typing'))
+    index = int(request.POST.get('index'))
 
-    lesson_dict = OrderedDict()
-    if typing == "0":
-        for unit1 in lesson_list[int(lesson)-1][1]:
-            for assignment in unit1[1]:
-                lesson_dict[assignment[2]] = assignment[0]
-        assignment = lesson_dict[int(index)]
-    else :
-        assignment = TWork.objects.get(id=index).title
+    if typing == 0:
+        assignment = get_unit_list()[index]
+    else:
+        assignment = TWork.ob.get(id=index).title
 
+    # lesson_dict = OrderedDict()
+    # if typing == "0":
+    #     for unit1 in lesson_list[int(lesson)-1][1]:
+    #         for assignment in unit1[1]:
+    #             lesson_dict[assignment[2]] = assignment[0]
+    #     assignment = lesson_dict[int(index)]
+    # else :
+    #     assignment = TWork.objects.get(id=index).title
+    
     if is_teacher(request.user, classroom_id):
         if user_id and action and lesson and index and typing:
             user = User.objects.get(id=user_id)
