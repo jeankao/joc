@@ -370,27 +370,27 @@ def work(request, typing, classroom_id):
             assignments = lesson_list
             unit_count = 1
             for i, unit in enumerate(lesson_list[lesson-1][1]):
-                    try:
-                        group_id = WorkGroup.objects.get(classroom_id=classroom_id, index=i, typing=typing).group_id
-                    except ObjectDoesNotExist:
-                        group_id = 0
-                    enroll_id = Enroll.objects.get(classroom_id=classroom_id, student_id=request.user.id).id
-                    try :
-                        studentgroup = StudentGroup.objects.get(enroll_id=enroll_id, group_id=group_id)
-                        group = studentgroup.group
-                    except ObjectDoesNotExist:
-                        group = -1
-                    sworks = list(filter(lambda w: w.index==i, works))
-                    assistant = list(filter(lambda w: (w.index==i and w.group==group), assistant_pool))
-                    if len(sworks)>0 :
-                        if len(assistant) > 0:
-                            lesson_dict[i] = [unit[0], False, sworks[0], unit_count, assistant[0].student_id]
-                        else :
-                            lesson_dict[i] = [unit[0], False, sworks[0], unit_count, 0]
+                try:
+                    group_id = WorkGroup.objects.get(classroom_id=classroom_id, index=i, typing=typing).group_id
+                except ObjectDoesNotExist:
+                    group_id = 0
+                enroll_id = Enroll.objects.get(classroom_id=classroom_id, student_id=request.user.id).id
+                try :
+                    studentgroup = StudentGroup.objects.get(enroll_id=enroll_id, group_id=group_id)
+                    group = studentgroup.group
+                except ObjectDoesNotExist:
+                    group = -1
+                sworks = list(filter(lambda w: w.index==i, works))
+                assistant = list(filter(lambda w: (w.index==i and w.group==group), assistant_pool))
+                if len(sworks)>0 :
+                    if len(assistant) > 0:
+                        lesson_dict[i] = [unit[0], False, sworks[0], unit_count, assistant[0].student_id]
                     else :
-                         lesson_dict[i] = [unit[0], False, None, unit_count]
+                        lesson_dict[i] = [unit[0], False, sworks[0], unit_count, 0]
+                else :
+                        lesson_dict[i] = [unit[0], False, None, unit_count]
 
-                    unit_count += 1
+                unit_count += 1
         return render(request, 'student/work.html', {'typing': typing, 'works':works, 'lesson_dict':lesson_dict.items(), 'user_id': request.user.id, 'classroom':classroom})
 
     elif typing == 1:
@@ -437,66 +437,68 @@ def work_download(request, typing, lesson, index, user_id, workfile_id):
     return response
     #return render_to_response('student/download.html', {'download':download})
 
+from teacher.views import get_unit_list
 
 # 查詢某作業分組小老師
 def work_group(request, typing, lesson, index, classroom_id):
-        if not is_classmate(request.user, classroom_id):
-            return redirect("/account/login/0")
-        student_groups = []
-        classroom = Classroom.objects.get(id=classroom_id)
+    if not is_classmate(request.user, classroom_id):
+        return redirect("/account/login/0")
+    student_groups = []
+    classroom = Classroom.objects.get(id=classroom_id)
 
+    try:
+        group_id = WorkGroup.objects.get(typing=typing, classroom_id=classroom_id, index=index).group_id
+    except ObjectDoesNotExist:
+        group_id = 0
+    group_id = WorkGroup.objects.get(classroom_id=classroom_id, index=index, typing=typing).group_id
+    enroll_id = Enroll.objects.get(classroom_id=classroom_id, student_id=request.user.id).id
+    try :
+        studentgroup = StudentGroup.objects.get(enroll_id=enroll_id, group_id=group_id)
+        group = studentgroup.group
+    except ObjectDoesNotExist:
+        group = -1
+
+    lesson = classroom.lesson
+    studentgroups = StudentGroup.objects.filter(group_id=group_id, group=group)
+    enroll_ids = map(lambda a: a.enroll_id, studentgroups)
+    enrolls = Enroll.objects.filter(id__in=enroll_ids)
+    group_assistants = []
+    works = []
+    scorer_name = ""
+    for member in enrolls:
+        enroll = Enroll.objects.get(id=member.id)
         try:
-            group_id = WorkGroup.objects.get(typing=typing, classroom_id=classroom_id, index=index).group_id
+            work = Work.objects.get(typing=typing, user_id=enroll.student_id, index=index, lesson=lesson)
+            if work.scorer > 0 :
+                scorer = User.objects.get(id=work.scorer)
+                scorer_name = scorer.first_name
+            else :
+                scorer_name = "X"
         except ObjectDoesNotExist:
-            group_id = 0
-        group_id = WorkGroup.objects.get(classroom_id=classroom_id, index=index, typing=typing).group_id
-        enroll_id = Enroll.objects.get(classroom_id=classroom_id, student_id=request.user.id).id
+            work = Work(typing=typing, lesson=lesson, index=index, user_id=enroll.student_id, score=-2)
+        except MultipleObjectsReturned:
+            work = Work.objects.filter(typing=typing, user_id=enroll.student_id, index=index, lesson=lesson).order_by("-id")[0]
+        works.append([enroll, work.score, scorer_name, work.file])
         try :
-            studentgroup = StudentGroup.objects.get(enroll_id=enroll_id, group_id=group_id)
-            group = studentgroup.group
+            assistant = WorkAssistant.objects.get(typing=typing, lesson=lesson, index=index, group=group, student_id=enroll.student_id)
+            group_assistants.append(enroll)
         except ObjectDoesNotExist:
-            group = -1
-
-        lesson = classroom.lesson
-        studentgroups = StudentGroup.objects.filter(group_id=group_id, group=group)
-        enroll_ids = map(lambda a: a.enroll_id, studentgroups)
-        enrolls = Enroll.objects.filter(id__in=enroll_ids)
-        group_assistants = []
-        works = []
-        scorer_name = ""
-        for member in enrolls:
-            enroll = Enroll.objects.get(id=member.id)
-            try:
-                work = Work.objects.get(typing=typing, user_id=enroll.student_id, index=index, lesson=lesson)
-                if work.scorer > 0 :
-                    scorer = User.objects.get(id=work.scorer)
-                    scorer_name = scorer.first_name
-                else :
-                    scorer_name = "X"
-            except ObjectDoesNotExist:
-                work = Work(typing=typing, lesson=lesson, index=index, user_id=enroll.student_id, score=-2)
-            except MultipleObjectsReturned:
-                work = Work.objects.filter(typing=typing, user_id=enroll.student_id, index=index, lesson=lesson).order_by("-id")[0]
-            works.append([enroll, work.score, scorer_name, work.file])
-            try :
-                assistant = WorkAssistant.objects.get(typing=typing, lesson=lesson, index=index, group=group, student_id=enroll.student_id)
-                group_assistants.append(enroll)
-            except ObjectDoesNotExist:
-                pass
-            except MultipleObjectsReturned:
-                assistants = WorkAssistant.objects.filter(typing=typing, lesson=lesson, index=index, group=group, student_id=enroll.student_id).order_by("-id")
-                assistant = assistants[0]
-                group_assistants.append(enroll)
-        student_groups.append([group, works, group_assistants])
-        if typing == 0:
-            lesson_dict = {}
-            for unit in lesson_list[int(lesson)-1][1]:
-                for assignment in unit[1]:
-                    lesson_dict[assignment[2]] = assignment[0]
-            assignment = lesson_dict[int(index)]
-        else:
-            assignment = TWork.objects.get(id=index).title
-        return render(request, 'student/work_group.html', {'lesson':lesson, 'assignment':assignment, 'student_groups':student_groups, 'classroom_id':classroom_id, 'typing':typing, 'index':index})
+            pass
+        except MultipleObjectsReturned:
+            assistants = WorkAssistant.objects.filter(typing=typing, lesson=lesson, index=index, group=group, student_id=enroll.student_id).order_by("-id")
+            assistant = assistants[0]
+            group_assistants.append(enroll)
+    student_groups.append([group, works, group_assistants])
+    if typing == 0:
+        # lesson_dict = {}
+        # for unit in lesson_list[int(lesson)-1][1]:
+        #     for assignment in unit[1]:
+        #         lesson_dict[assignment[2]] = assignment[0]
+        # assignment = lesson_dict[int(index)]
+        assignment = get_unit_list()[index]
+    else:
+        assignment = TWork.objects.get(id=index).title
+    return render(request, 'student/work_group.html', {'lesson':lesson, 'assignment':assignment, 'student_groups':student_groups, 'classroom_id':classroom_id, 'typing':typing, 'index':index})
 
 def memo(request, typing, classroom_id, index):
     if not is_classmate(request.user, classroom_id):

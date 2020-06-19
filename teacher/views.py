@@ -1241,7 +1241,7 @@ def work_class(request, typing, classroom_id, index):
         return custom[0].seat
 
     classmate_work = sorted(classmate_work, key=getKey)
-    return render(request, 'teacher/work_class.html',{'group_id':group_id, 'typing':0, 'classmate_work': classmate_work, 'classroom':classroom, 'index': index})
+    return render(request, 'teacher/work_class.html',{'group_id':group_id, 'typing':typing, 'classmate_work': classmate_work, 'classroom':classroom, 'index': index})
 
 # 教師評分
 @login_required
@@ -1286,7 +1286,20 @@ def work_group(request, typing, classroom_id, index):
         return custom[4], custom[1].publication_date
 
     classmate_work = sorted(classmate_work, key=getKey)
-    return render(request, 'teacher/work_group.html',{'test': group_id, 'typing':typing, 'classmate_work': classmate_work, 'classroom':classroom, 'index': index, 'lesson':lesson})
+    return render(request, 'teacher/work_group.html',{'group_id':group_id, 'typing':0, 'classmate_work': classmate_work, 'classroom':classroom, 'index': index})
+    # return render(request, 'teacher/work_group.html',{'test': group_id, 'typing':typing, 'classmate_work': classmate_work, 'classroom':classroom, 'index': index, 'lesson':lesson})
+
+def get_work_user_group(classid, typing, index, userid):
+    try:
+        group = StudentGroup.objects.filter(
+            group_id = WorkGroup.objects.get(typing=typing, classroom_id=classid, index=index).group_id or 0,
+            enroll_id = Enroll.objects.get(classroom_id=classid, student_id=userid).id
+        ).values_list('group', flat=True)
+        if group:
+            return group[0]
+    except:
+        pass
+    return -1
 
 # 教師評分
 class Scoring(UpdateView):
@@ -1295,14 +1308,27 @@ class Scoring(UpdateView):
     template_name = 'teacher/work_form.html'
 
     def get_object(self):
-        classroom = Classroom.objects.get(id = self.kwargs['classroom_id'])
-        userid = self.kwargs['user_id']
-        index = self.kwargs['index']
-        typing = self.kwargs['typing']
-        return Work.objects.filter(typing=typing, user_id=userid, index=index, lesson=classroom.lesson).annotate(
+        self.classroom = Classroom.objects.get(id = self.kwargs['classroom_id'])
+        self.userid = self.kwargs['user_id']
+        self.index = self.kwargs['index']
+        self.typing = self.kwargs['typing']
+        self.extra_context = {
+            'wassistant': WorkAssistant.objects.filter(
+                    typing = self.typing,
+                    lesson = self.classroom.lesson,
+                    index = self.index,
+                    student_id = self.userid
+                ).exists(),
+            'group': get_work_user_group(self.classroom.id, self.typing, self.index, self.userid)+1,
+            'stuid': self.userid,
+            'index': self.index,
+            'typing': self.typing,
+            'classroom': self.classroom,
+        }
+        return Work.objects.filter(typing=self.typing, user_id=self.userid, index=self.index, lesson=self.classroom.lesson).annotate(
             username = Subquery(
-                User.objects.filter(id=userid).values('first_name')
-            )
+                User.objects.filter(id=self.userid).values('first_name')
+            ),
         ).order_by('-id')[0]
 
     def get_form(self):
@@ -1324,9 +1350,9 @@ class Scoring(UpdateView):
         return form
 
     def get_success_url(self):
-        classid = self.kwargs['classroom_id']
-        index = self.kwargs['index']
-        typing = self.kwargs['typing']
+        classid = self.classroom.id
+        index = self.index
+        typing = self.typing
         return f"/teacher/work/class/{typing}/{classid}/{index}/"
 
     def form_valid(self, form):
@@ -1551,7 +1577,6 @@ class MemoScore(ClassroomTeacherRequiredMixin, UpdateView):
         ).get(student_id=self.kwargs['user_id'], classroom_id=self.kwargs['classroom_id'])
 
     def get_form(self):
-
         if self.kwargs['typing'] == 0:
             field_name = 'score_memo'
         else:
@@ -1799,7 +1824,7 @@ def steacher_make(request):
     #     assignment = lesson_dict[int(index)]
     # else :
     #     assignment = TWork.objects.get(id=index).title
-    
+
     if is_teacher(request.user, classroom_id):
         if user_id and action and lesson and index and typing:
             user = User.objects.get(id=user_id)

@@ -13,7 +13,17 @@
   <div class="card-footer">
     <form action="" method="post">
       {% csrf_token %}
-      {{ form }}
+      {% if classroom.teacher_id == user.id %}
+      <div class="custom-control custom-switch text-right">
+        <input type="checkbox" class="custom-control-input" id="work_assistant" {% if wassistant %}checked{% endif %}>
+        <label class="custom-control-label" for="work_assistant" id="work_assistant_label">
+          設為{% if group %}第{{ group }}組{% endif %}小老師
+        </label>
+      </div>        
+      {% endif %}
+      <div>
+      {{ form.as_p }}
+      </div>
       <input type="submit" value="送出">
     </form>
   </div>
@@ -27,5 +37,23 @@
 {% endblock %}
 
 {% block footer_script %}
-hljs.initHighlightingOnLoad();
+  hljs.initHighlightingOnLoad();
+  {% if classroom.teacher_id == user.id %}
+  $('#work_assistant').on('change', function(e) {
+    var launcher = this;
+    e.preventDefault();
+    console.log(this.checked);
+    $.post(
+      '/teacher/work/assistant/make/', 
+      {
+        userid: {{ stuid }}, 
+        action: launcher.checked ? "set" : "unset", 
+        typing: {{ typing }}, 
+        lesson: {{ classroom.lesson }}, 
+        index: {{ index }},
+        classroomid: {{ classroom.id }},
+      },    
+    );
+  });
+  {% endif %}
 {% endblock %}

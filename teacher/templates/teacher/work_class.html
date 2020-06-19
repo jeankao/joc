@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% load tag %}
 {% block content %}
-<button class="btn btn-info active">座號</button>
-<a href="/teacher/work/group/{{typing}}/{{classroom.id}}/{{index}}" role="button" class="btn btn-outline-info">組別</a>
+  {% block switch %}
+  <button class="btn btn-info active">座號</button>
+  <a href="/teacher/work/group/{{typing}}/{{classroom.id}}/{{index}}" role="button" class="btn btn-outline-info">組別</a>
+  {% endblock %}
 <table class="table">
   <tr>
     <td>學生</td>
@@ -12,10 +14,12 @@
   {% for list in classmate_work  %}
   <tr>
     <td>
+      <span class="badge badge-light">
+        {{list.0.seat}}
+      </span>
       {% if not list.1.user_id == 0 %}
-        {{list.0.seat}})
         <a href="/teacher/scoring/{{typing}}/{{classroom.id}}/{{list.0.student.id}}/{{index}}">
-          {{list.0.student.first_name}}-{% if list.1 %}{{list.1.publication_date}}{% endif %}
+          {{list.0.student.first_name}}-{% if list.1 %}{{list.1.publication_date|date:"Y-m-d H:i"}}{% endif %}
           {% if list.1.score > 0 %}
             ({{list.1.score}}-{{list.1.scorer|nickname}})
           {% elif list.1.score == -1 %}
@@ -23,7 +27,7 @@
           {%  endif %}
         </a><br />
       {% else %}
-        {{list.0.seat}}){{list.0.student.first_name}}-尚未繳交<br />
+        {{list.0.student.first_name}}-尚未繳交<br />
       {% endif %}
     </td>
     <td>
@@ -31,16 +35,16 @@
         尚未分組
       {% else %}
         第 {{ list.4|add:1 }} 組
-      {% endif %}      
+      {% endif %}
     </td>
     <td>
     {% if group_id > 0 and list.1.user_id > 0 %}
       {% if list.2 > 0 %}
-        <a class="assistant btn btn-primary active" role="button" href="/teacher/work/assistant/make/"
+        <a class="assistant btn btn-sm btn-primary active" role="button" href="/teacher/work/assistant/make/"
           data-classroomid="{{classroom.id}}" data-userid="{{ list.1.user_id }}"
           data-action="unset" data-lesson="{{ classroom.lesson }}" data-index="{{ index }}">取消小老師</a>
       {% else %}
-        <a class="assistant btn btn-outline-primary" role="button" href="/teacher/work/assistant/make"
+        <a class="assistant btn btn-sm btn-outline-primary" role="button" href="/teacher/work/assistant/make"
           data-classroomid="{{classroom.id}}" data-userid="{{ list.1.user_id }}" data-action="set"
           data-lesson="{{ classroom.lesson }}" data-index="{{ index }}">設為小老師</a>
       {% endif %}
@@ -53,13 +57,13 @@
 {% endblock %}
 {% block domready %}
   $('a.assistant').click(function(e){
-    var launcher = this;  
+    var launcher = this;
     e.preventDefault();
     $.post('/teacher/work/assistant/make/',
       {
         userid: $(launcher).data('userid'),
         action: $(launcher).data('action'),
-        typing: "{{typing}}",		
+        typing: "{{typing}}",
         lesson: $(launcher).data('lesson'),
         index: $(launcher).data('index'),
         classroomid: $(launcher).data('classroomid'),
@@ -75,7 +79,7 @@
            } else {
                $(launcher).removeClass("btn-primary active").addClass("btn-outline-primary");
                $(launcher).html("設為小老師");
-               $(launcher).data('action', 'set');               
+               $(launcher).data('action', 'set');
            }
         } else {
           alert("hello");
