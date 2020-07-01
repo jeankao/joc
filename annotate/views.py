@@ -101,7 +101,7 @@ def search(req):
                       firstname = Subquery(
                           User.objects.filter(id=OuterRef('user_id')).values('first_name')[:1]
                       )
-                  ).order_by('id')
+                  ).exclude(content__text='').order_by('id') # 濾掉空白註記
     total = len(annotations)
     rows = []
     for annotation in annotations:

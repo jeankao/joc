@@ -7,6 +7,16 @@ from django.core.validators import RegexValidator, validate_comma_separated_inte
 
 # 學生選課資料
 class Enroll(models.Model):
+    SCORE_CHOICES = [
+        (100, "你好棒(100分)"),
+        (90, "90分"),
+        (80, "80分"),
+        (70, "70分"),
+        (60, "60分"),
+        (40, "40分"),
+        (20, "20分"),
+        (0, "0分"),
+    ]
     # 學生序號
     student_id = models.IntegerField(default=0)
     # 班級序號
@@ -18,8 +28,10 @@ class Enroll(models.Model):
     # 組別
     group = models.IntegerField("組別", default=-1)
     # 心得
-    score_memo = models.IntegerField("指定作業心得成績", default=0)
-    score_memo2 = models.IntegerField("自訂作業心得成績", default=0)
+    score_memo = models.IntegerField("指定作業心得成績", default=0, choices=SCORE_CHOICES)
+    score_memo2 = models.IntegerField("自訂作業心得成績", default=0, choices=SCORE_CHOICES)
+    # 註記
+    score_annotations = models.IntegerField("註記成績", default=0, choices=SCORE_CHOICES)
 
     @property
     def classroom(self):
@@ -69,14 +81,24 @@ def upload_path_handler(instance, filename):
 
 class Work(models.Model):
     HELP_CHOICES = [
-            (0, "全部靠自己想"),
-            (1, "同學幫一點忙"),
-            (2, "同學幫很多忙"),
-            (3, "解答幫一點忙"),
-            (4, "解答幫很多忙"),
-            (5, "老師幫一點忙"),
-            (6, "老師幫很多忙"),
-		]
+        (0, "全部靠自己想"),
+        (1, "同學幫一點忙"),
+        (2, "同學幫很多忙"),
+        (3, "解答幫一點忙"),
+        (4, "解答幫很多忙"),
+        (5, "老師幫一點忙"),
+        (6, "老師幫很多忙"),
+    ]
+
+    SCORE_OPTIONS = [
+        (-2, ""),
+        (100, "100分"),
+        (90, "90分"),
+        (80, "80分"),
+        (70, "70分"),
+        (60, "60分"),
+        (-1, "重交"),
+    ]
 
     user_id = models.IntegerField(default=0)
     lesson = models.IntegerField(default=0)
@@ -87,7 +109,7 @@ class Work(models.Model):
     memo_e = models.IntegerField(default=0)
     publish = models.BooleanField(default=False)
     publication_date = models.DateTimeField(default=timezone.now)
-    score = models.IntegerField('成績', default=-2)
+    score = models.IntegerField('成績', default=-2, choices=SCORE_OPTIONS)
     scorer = models.IntegerField('評分人id', default=0)
 	# scratch, microbit
     file = models.FileField()
@@ -97,7 +119,7 @@ class Work(models.Model):
     helps = models.IntegerField('創作過程', default=0, choices=HELP_CHOICES)
     answer = models.BooleanField(default=False)
     youtube = models.TextField(default='')
-    comment = models.TextField('評語回饋', default='')
+    comment = models.TextField('評語回饋', default='', blank=True, null=True)
 
     def __unicode__(self):
         user = User.objects.filter(id=self.user_id)[0]

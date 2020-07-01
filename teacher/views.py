@@ -3,6 +3,7 @@ from teacher.models import *
 from student.models import *
 from student.lesson import *
 from account.avatar import *
+from annotate.models import Annotation
 from django.views import generic
 from django.contrib.auth.models import User, Group
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView, RedirectView, TemplateView
@@ -1254,6 +1255,11 @@ def work_group(request, typing, classroom_id, index):
     lesson = classroom.lesson
     classmate_work = []
     scorer_name = ""
+    try:
+        group_id = WorkGroup.objects.get(typing=typing, classroom_id=classroom_id, index=index).group_id
+    except ObjectDoesNotExist:
+        group_id = 0
+
     for enroll in enrolls:
         try:
             work = Work.objects.get(typing=typing, user_id=enroll.student_id, index=index, lesson=classroom.lesson)
@@ -1266,10 +1272,6 @@ def work_group(request, typing, classroom_id, index):
             work = Work(typing=typing, index=index, user_id=0, lesson=classroom.lesson)
         except MultipleObjectsReturned:
             work = Work.objects.filter(typing=typing, user_id=enroll.student_id, index=index, lesson=classroom.lesson).last()
-        try:
-            group_id = WorkGroup.objects.get(typing=typing, classroom_id=classroom_id, index=index).group_id
-        except ObjectDoesNotExist:
-            group_id = 0
         if group_id > 0:
             try:
                 group = StudentGroup.objects.get(enroll_id=enroll.id, group_id=group_id).group
@@ -1287,7 +1289,6 @@ def work_group(request, typing, classroom_id, index):
 
     classmate_work = sorted(classmate_work, key=getKey)
     return render(request, 'teacher/work_group.html',{'group_id':group_id, 'typing':0, 'classmate_work': classmate_work, 'classroom':classroom, 'index': index})
-    # return render(request, 'teacher/work_group.html',{'test': group_id, 'typing':typing, 'classmate_work': classmate_work, 'classroom':classroom, 'index': index, 'lesson':lesson})
 
 def get_work_user_group(classid, typing, index, userid):
     try:
@@ -1325,29 +1326,16 @@ class Scoring(UpdateView):
             'typing': self.typing,
             'classroom': self.classroom,
         }
-        return Work.objects.filter(typing=self.typing, user_id=self.userid, index=self.index, lesson=self.classroom.lesson).annotate(
+        return Work.objects.filter(
+            typing  = self.typing, 
+            user_id = self.userid, 
+            index   = self.index, 
+            lesson  = self.classroom.lesson
+        ).annotate(
             username = Subquery(
                 User.objects.filter(id=self.userid).values('first_name')
             ),
         ).order_by('-id')[0]
-
-    def get_form(self):
-        form = super().get_form()
-        form.fields['comment'].required = False     # 評語改為非必填
-        # 分數改為下拉選單
-        form.fields['score'] = forms.ChoiceField(
-            label = form.fields['score'].label,
-            choices = [
-                (-2, ""),
-                (100, "100分"),
-                (90, "90分"),
-                (80, "80分"),
-                (70, "70分"),
-                (60, "60分"),
-                (-1, "重交"),
-            ],
-        )
-        return form
 
     def get_success_url(self):
         classid = self.classroom.id
@@ -1558,7 +1546,7 @@ def memo(request, classroom_id):
         ),
     ).order_by("seat")
     classroom = Classroom.objects.get(id=classroom_id)
-    return render(request, 'teacher/memo.html', {'lesson':classroom.lesson, 'enrolls':enrolls, 'classroom_name':classroom.name})
+    return render(request, 'teacher/memo.html', {'lesson':classroom.lesson, 'enrolls':enrolls, 'classroom_name':classroom.name, 'classid': classroom_id})
 
 def get_unit_list():
     return list(map(lambda u: u[0],lesson_list[-1][1]))
@@ -1566,7 +1554,6 @@ def get_unit_list():
 # 學生心得評分
 class MemoScore(ClassroomTeacherRequiredMixin, UpdateView):
     model = Enroll
-    # fields = ['score_memo', 'score_memo2']
     template_name = "teacher/memo_score_form.html"
 
     def get_object(self):
@@ -1583,19 +1570,6 @@ class MemoScore(ClassroomTeacherRequiredMixin, UpdateView):
             field_name = 'score_memo2'
         self.fields = [field_name]
         form = super().get_form()
-        form.fields[field_name] = forms.ChoiceField(
-            label = form.fields[field_name].label,
-            choices = [
-                (100, "你好棒(100分)"),
-                (90, "90分"),
-                (80, "80分"),
-                (70, "70分"),
-                (60, "60分"),
-                (40, "40分"),
-                (20, "20分"),
-                (0, "0分"),
-            ],
-        )
         return form
 
     def get_success_url(self):
@@ -1603,9 +1577,8 @@ class MemoScore(ClassroomTeacherRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        # classroom.objects.get(id=self.kwargs['classroom_id'])
-        # lesson = classroom.lesson
-        lesson = 1
+        classroom = Classroom.objects.get(id=self.kwargs['classroom_id'])
+        lesson = classroom.lesson
 
         works = Work.objects.filter(
             typing = self.kwargs['typing'],
@@ -1687,6 +1660,47 @@ def check(request, typing, unit, user_id, classroom_id):
             form = CheckForm2(instance=enroll)
     return render(request, 'teacher/check.html', {'typing':typing, 'works':works, 'lesson': lesson, 'unit':unit, 'form':form, 'works':works, 'lesson_list':sorted(lesson_dict.items()), 'enroll': enroll, 'classroom_id':classroom_id})
 '''
+
+class ScoreAnnotation(UpdateView):
+    model = Enroll
+    fields = ['score_annotations']
+    template_name = "teacher/annotation_score_form.html"
+
+    def get_object(self):
+        return Enroll.objects.annotate(
+            firstname = Subquery(
+                User.objects.filter(id=OuterRef('student_id')).values_list('first_name'),
+            ),
+        ).get(student_id=self.kwargs['user_id'], classroom_id=self.kwargs['classroom_id'])
+
+    def get_success_url(self):
+        return reverse('class_memo_list', args=[self.kwargs['classroom_id']])
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        lesson = Classroom.objects.get(id=self.kwargs['classroom_id']).lesson
+
+        # 濾掉空白註記
+        annotations = Annotation.objects.filter(
+            user = User(id=self.kwargs['user_id']), 
+        ).exclude(content__text = '').order_by('unit', 'content__img', 'updated')
+
+        work_dict = {}
+        for id, title in enumerate(get_unit_list()):
+            work_dict[id+1] = {'title': title}
+
+        for annotation in annotations:
+            if not 'annotations' in work_dict[annotation.unit]:
+                work_dict[annotation.unit]['annotations'] = {'img': {}, 'txt': []}
+            if 'img' in annotation.content:
+                if annotation.content['img'] not in work_dict[annotation.unit]['annotations']['img']:
+                    work_dict[annotation.unit]['annotations']['img'][annotation.content['img']] = []
+                work_dict[annotation.unit]['annotations']['img'][annotation.content['img']].append(annotation)
+            else:
+                work_dict[annotation.unit]['annotations']['txt'].append(annotation)
+
+        ctx['work_dict'] = work_dict
+        return ctx
 
 # 退選
 @login_required
@@ -1845,7 +1859,6 @@ def steacher_make(request):
             except ObjectDoesNotExist:
                 assistant = WorkAssistant(typing=typing, group=group, student_id=user_id, lesson=lesson, index=index)
             assistant.save()
-
 
             # create Message
             title = u"<" + assistant.student.first_name+ u">擔任小老師<" + assignment + u">"

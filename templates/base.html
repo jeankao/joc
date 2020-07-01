@@ -119,7 +119,6 @@
   $(document).ready(function(){
     $('main').css('padding-top', $('.toprow').height());
     {% block domready %}{% endblock %}
-    console.log($);
   });
   {% block userscript %}{% endblock %}
   $("#backtotop").click(function () {

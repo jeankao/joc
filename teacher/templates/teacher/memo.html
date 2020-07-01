@@ -3,6 +3,7 @@
 {% block title %} Teachers {% endblock %}
 
 {% block content %}
+  {{ classroom }}
   班級名稱：{{ classroom_name }}<BR>
   {% if lesson == 1 %}
     <table class="table table-sm table-hover">
@@ -10,6 +11,7 @@
         <td>姓名</td>
         <td>指定作業</td>
         <td>自訂作業</td>
+        <td>註記</td>
       </tr>
       {% for enroll in enrolls %}
       <tr>
@@ -19,13 +21,21 @@
         </td>
         <td>
           <a href="/teacher/check/0/1/{{enroll.student_id}}/{{enroll.classroom_id}}">
-            批閱心得({{enroll.score_memo}})
+            批閱心得
           </a>
+          <span class="score">{{enroll.score_memo}}</span>
         </td>
         <td>
           <a href="/teacher/check/1/1/{{enroll.student_id}}/{{enroll.classroom_id}}">
-            批閱心得({{enroll.score_memo2}})
+            批閱心得
           </a>
+          <span class="score">{{enroll.score_memo2}}</span>
+        </td>
+        <td>
+          <a href="{% url 'score_annotation' enroll.classroom_id enroll.student_id %}">
+            批閱註記
+          </a>
+          <span class="score">{{ enroll.score_annotations }}</span>
         </td>
       </tr>
       {% endfor %}
