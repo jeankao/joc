@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'joc.wsgi.application'
 DATABASES = {
     'default': {
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    'NAME': 'joc',
+    'NAME': 'joc2',
     'USER': 'postgres',
     'PASSWORD': '5543',
     'HOST': 'localhost',
